@@ -2,7 +2,8 @@ package io.github.winnpixie.btgui.utilities;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /* BuildTools' options, derived from
 https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse/src/main/java/org/spigotmc/builder/Builder.java
@@ -25,23 +26,21 @@ public class BTOptions {
     public static String revision = "latest"; // rev <REVISION>
     public static String pullRequests = ""; // pull-request/pr <REPO:ID>
 
-    public static String buildCommand(String javaPath, String btPath) {
-        StringBuilder builder = new StringBuilder(javaPath);
-        if (!javaPath.endsWith(File.separator)) builder.append(File.separatorChar);
-        builder.append("bin").append(File.separatorChar).append("java -jar ");
-        builder.append(btPath).append(' ');
+    public static List<String> buildArguments() {
+        List<String> arguments = new ArrayList<>();
 
-        if (skipCertCheck) builder.append("--disable-certificate-check ");
-        if (skipJavaVersionCheck) builder.append("--disable-java-check ");
-        if (skipGitPull) builder.append("--dont-update ");
-        if (generateSourcesJar) builder.append("--generate-source ");
-        if (generateJavadocsJar) builder.append("--generate-docs ");
-        if (developerMode) builder.append("--dev ");
-        if (remapped) builder.append("--remapped ");
-        if (compileIfChanged) builder.append("--compile-if-changed ");
+        if (skipCertCheck) arguments.add("--disable-certificate-check");
+        if (skipJavaVersionCheck) arguments.add("--disable-java-check");
+        if (skipGitPull) arguments.add("--dont-update");
+        if (generateSourcesJar) arguments.add("--generate-source");
+        if (generateJavadocsJar) arguments.add("--generate-docs");
+        if (developerMode) arguments.add("--dev");
+        if (remapped) arguments.add("--remapped");
+        if (compileIfChanged) arguments.add("--compile-if-changed");
 
         if (!skipGitPull && !developerMode) {
-            builder.append("--rev ").append(revision).append(' ');
+            arguments.add("--rev");
+            arguments.add(revision);
         }
 
         if (!pullRequests.isEmpty()) {
@@ -49,20 +48,28 @@ public class BTOptions {
                 String[] data = pr.split(":", 2);
                 if (data.length < 2) continue;
 
-                builder.append("--pull-request ").append(pr).append(' ');
+                arguments.add("--pull-request");
+                arguments.add(pr);
             }
         }
 
         if (compileNothing) {
-            builder.append("--compile NONE ");
+            arguments.add("--compile");
+            arguments.add("NONE");
         } else if (compileSpigot && compileCraftBukkit) {
-            builder.append("--compile CRAFTBUKKIT,SPIGOT ");
+            arguments.add("--compile");
+            arguments.add("CRAFTBUKKIT,SPIGOT");
         } else if (compileCraftBukkit) {
-            builder.append("--compile CRAFTBUKKIT ");
+            arguments.add("--compile");
+            arguments.add("CRAFTBUKKIT");
         } else if (compileSpigot) {
-            builder.append("--compile SPIGOT ");
+            arguments.add("--compile");
+            arguments.add("SPIGOT");
         }
 
-        return builder.toString();
+        arguments.add("--output-dir");
+        arguments.add(outputDirectory);
+
+        return arguments;
     }
 }

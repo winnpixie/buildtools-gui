@@ -7,7 +7,7 @@ import javax.swing.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class BTOptionsPanel extends JPanel {
+public class BuildToolsOptionsPanel extends JPanel {
     private final JCheckBox skipCertCheckOption = new JCheckBox("Skip HTTPS Certificate Check", false);
     private final JCheckBox skipJavaVersionCheckOption = new JCheckBox("Skip Java Version Check", false);
     private final JCheckBox skipGitPullOption = new JCheckBox("Skip 'git pull'", false);
@@ -26,7 +26,7 @@ public class BTOptionsPanel extends JPanel {
 
     private final JButton chooseOutputDirBtn = new JButton("Set Output Directory");
 
-    public BTOptionsPanel() {
+    public BuildToolsOptionsPanel() {
         super();
 
         super.setLayout(null);

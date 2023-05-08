@@ -1,9 +1,9 @@
 package io.github.winnpixie.btgui.window;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
-import io.github.winnpixie.btgui.window.panels.BTGUIOptionsPanel;
-import io.github.winnpixie.btgui.window.panels.BTOptionsPanel;
-import io.github.winnpixie.btgui.window.panels.BTProcessingPanel;
+import io.github.winnpixie.btgui.window.panels.BuildToolsGUIOptionsPanel;
+import io.github.winnpixie.btgui.window.panels.BuildToolsOptionsPanel;
+import io.github.winnpixie.btgui.window.panels.ProcessingPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,9 +33,9 @@ public class BTWindow extends JFrame {
     public void populateWithComponents() {
         JTabbedPane tabsPane = new JTabbedPane();
 
-        tabsPane.add("BTGUI Options", new BTGUIOptionsPanel());
-        tabsPane.add("BT Options", new BTOptionsPanel());
-        tabsPane.add("Processing", new BTProcessingPanel());
+        tabsPane.add("BTGUI Options", new BuildToolsGUIOptionsPanel());
+        tabsPane.add("BT Options", new BuildToolsOptionsPanel());
+        tabsPane.add("Processing", new ProcessingPanel());
 
         super.add(tabsPane);
     }
