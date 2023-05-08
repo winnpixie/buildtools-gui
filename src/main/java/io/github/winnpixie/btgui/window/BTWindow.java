@@ -1,16 +1,16 @@
 package io.github.winnpixie.btgui.window;
 
-import io.github.winnpixie.btgui.BTGUI;
+import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.window.panels.BTGUIOptionsPanel;
 import io.github.winnpixie.btgui.window.panels.BTOptionsPanel;
-import io.github.winnpixie.btgui.window.panels.BTOutputPanel;
+import io.github.winnpixie.btgui.window.panels.BTProcessingPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class BTWindow extends JFrame {
     public BTWindow() throws HeadlessException {
-        super(String.format("BuildTools GUI (v%s) - https://github.com/winnpixie/bt-gui/", BTGUI.VERSION));
+        super(String.format("BuildTools GUI (v%s) - https://github.com/winnpixie/bt-gui/", BuildToolsGUI.VERSION));
 
         this.configureWindow();
         this.populateWithComponents();
@@ -33,9 +33,9 @@ public class BTWindow extends JFrame {
     public void populateWithComponents() {
         JTabbedPane tabsPane = new JTabbedPane();
 
-        tabsPane.add("BT Options", new BTOptionsPanel());
-        tabsPane.add("BT Output", new BTOutputPanel());
         tabsPane.add("BTGUI Options", new BTGUIOptionsPanel());
+        tabsPane.add("BT Options", new BTOptionsPanel());
+        tabsPane.add("Processing", new BTProcessingPanel());
 
         super.add(tabsPane);
     }
