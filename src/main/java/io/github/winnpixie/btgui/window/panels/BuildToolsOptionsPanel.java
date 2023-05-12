@@ -1,11 +1,14 @@
 package io.github.winnpixie.btgui.window.panels;
 
+import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.utilities.BTOptions;
 import io.github.winnpixie.btgui.window.JTextFieldWithPlaceholder;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 public class BuildToolsOptionsPanel extends JPanel {
     private final JCheckBox skipCertCheckOption = new JCheckBox("Skip HTTPS Certificate Check", false);
@@ -137,7 +140,15 @@ public class BuildToolsOptionsPanel extends JPanel {
 
         chooseOutputDirBtn.setBounds(300, 220, 200, 20);
         chooseOutputDirBtn.addActionListener(e -> {
-            // TODO: File Chooser
+            JFileChooser chooser = new JFileChooser(BuildToolsGUI.CURRENT_DIRECTORY);
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+            File dir = chooser.getSelectedFile();
+            if (dir == null) return;
+
+            BTOptions.outputDirectory = dir.getAbsolutePath();
+            outputDirectory.setText(BTOptions.outputDirectory);
         });
         super.add(chooseOutputDirBtn);
     }
