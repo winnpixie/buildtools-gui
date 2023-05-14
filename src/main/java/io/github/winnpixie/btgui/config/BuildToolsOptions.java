@@ -1,4 +1,4 @@
-package io.github.winnpixie.btgui.utilities;
+package io.github.winnpixie.btgui.config;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
 
@@ -8,7 +8,7 @@ import java.util.List;
 /* BuildTools' options, derived from
 https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse/src/main/java/org/spigotmc/builder/Builder.java
  */
-public class BTOptions {
+public class BuildToolsOptions {
     public static boolean skipCertCheck = false; // disable-certificate-check
     public static boolean skipJavaVersionCheck = false; // disable-java-check
     public static boolean skipGitPull = false; // dont-update
@@ -68,7 +68,7 @@ public class BTOptions {
         }
 
         arguments.add("--output-dir");
-        arguments.add(outputDirectory);
+        arguments.add(String.format("\"%s\"", outputDirectory));
 
         return arguments;
     }

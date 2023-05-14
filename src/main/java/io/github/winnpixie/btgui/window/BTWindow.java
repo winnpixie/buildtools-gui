@@ -23,7 +23,7 @@ public class BTWindow extends JFrame {
         super.setPreferredSize(new Dimension(640, 480));
 
         try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException |
                  IllegalAccessException e) {
             e.printStackTrace();

@@ -15,10 +15,6 @@ public class BuildToolsGUI {
 
         new BTWindow();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            // TODO: Cleanup program
-        }));
-
         LOGGER.info("END bt-gui init");
     }
 }

@@ -1,11 +1,10 @@
 package io.github.winnpixie.btgui.window.panels;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
-import io.github.winnpixie.btgui.utilities.BTOptions;
+import io.github.winnpixie.btgui.config.BuildToolsOptions;
 import io.github.winnpixie.btgui.window.JTextFieldWithPlaceholder;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -23,11 +22,11 @@ public class BuildToolsOptionsPanel extends JPanel {
     private final JCheckBox compileCraftBukkitOption = new JCheckBox("Compile CraftBukkit", false);
     private final JCheckBox compileNothingOption = new JCheckBox("Don't Compile", false);
 
-    private final JTextFieldWithPlaceholder revision = new JTextFieldWithPlaceholder("latest", "Revision (ie. latest)");
-    private final JTextFieldWithPlaceholder pullRequests = new JTextFieldWithPlaceholder("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
-    private final JTextFieldWithPlaceholder outputDirectory = new JTextFieldWithPlaceholder("Output Directory");
+    private final JTextField revision = new JTextFieldWithPlaceholder("latest", "Revision (ie. latest)");
+    private final JTextField pullRequests = new JTextFieldWithPlaceholder("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
+    private final JTextField outputDirectory = new JTextFieldWithPlaceholder(BuildToolsOptions.outputDirectory, "Output Directory");
 
-    private final JButton chooseOutputDirBtn = new JButton("Set Output Directory");
+    private final JButton chooseOutputDir = new JButton("Set Output Directory");
 
     public BuildToolsOptionsPanel() {
         super();
@@ -39,23 +38,23 @@ public class BuildToolsOptionsPanel extends JPanel {
     private void populateWithComponents() {
         skipCertCheckOption.setBounds(0, 0, 200, 20);
         skipCertCheckOption.setToolTipText("BuildTools CLI Arg: --disable-certificate-check");
-        skipCertCheckOption.addActionListener(e -> BTOptions.skipCertCheck = skipCertCheckOption.isSelected());
+        skipCertCheckOption.addActionListener(e -> BuildToolsOptions.skipCertCheck = skipCertCheckOption.isSelected());
         super.add(skipCertCheckOption);
 
         skipJavaVersionCheckOption.setBounds(0, 20, 200, 20);
         skipJavaVersionCheckOption.setToolTipText("BuildTools CLI Arg: --disable-java-check");
-        skipJavaVersionCheckOption.addActionListener(e -> BTOptions.skipJavaVersionCheck = skipJavaVersionCheckOption.isSelected());
+        skipJavaVersionCheckOption.addActionListener(e -> BuildToolsOptions.skipJavaVersionCheck = skipJavaVersionCheckOption.isSelected());
         super.add(skipJavaVersionCheckOption);
 
         skipGitPullOption.setBounds(0, 40, 200, 20);
         skipGitPullOption.setToolTipText("BuildTools CLI Arg: --dont-update");
         skipGitPullOption.addActionListener(e -> {
-            BTOptions.skipGitPull = skipGitPullOption.isSelected();
+            BuildToolsOptions.skipGitPull = skipGitPullOption.isSelected();
 
-            if (BTOptions.skipGitPull) {
+            if (BuildToolsOptions.skipGitPull) {
                 revision.setEditable(false);
                 revision.setToolTipText("Revisions can not be used when \"Skip 'git pull'\" is enabled.");
-            } else if (!BTOptions.developerMode) {
+            } else if (!BuildToolsOptions.developerMode) {
                 revision.setEditable(true);
                 revision.setToolTipText("BuildTools CLI Arg: --rev <REVISION>");
             }
@@ -81,12 +80,12 @@ public class BuildToolsOptionsPanel extends JPanel {
         developerModeOption.setBounds(0, 140, 200, 20);
         developerModeOption.setToolTipText("BuildTools CLI Arg: --dev");
         developerModeOption.addActionListener(e -> {
-            BTOptions.developerMode = developerModeOption.isSelected();
+            BuildToolsOptions.developerMode = developerModeOption.isSelected();
 
-            if (BTOptions.developerMode) {
+            if (BuildToolsOptions.developerMode) {
                 revision.setEditable(false);
                 revision.setToolTipText("Revisions can not be used when Dev Mode is enabled.");
-            } else if (!BTOptions.skipGitPull) {
+            } else if (!BuildToolsOptions.skipGitPull) {
                 revision.setEditable(true);
                 revision.setToolTipText("BuildTools CLI Arg: --rev <REVISION>");
             }
@@ -95,12 +94,12 @@ public class BuildToolsOptionsPanel extends JPanel {
 
         compileSpigotOption.setBounds(0, 180, 200, 20);
         compileSpigotOption.setToolTipText("BuildTools CLI Arg: --compile SPIGOT");
-        compileSpigotOption.addActionListener(e -> BTOptions.compileSpigot = compileSpigotOption.isSelected());
+        compileSpigotOption.addActionListener(e -> BuildToolsOptions.compileSpigot = compileSpigotOption.isSelected());
         super.add(compileSpigotOption);
 
         compileCraftBukkitOption.setBounds(200, 180, 200, 20);
         compileCraftBukkitOption.setToolTipText("BuildTools CLI Arg: --compile CRAFTBUKKIT");
-        compileCraftBukkitOption.addActionListener(e -> BTOptions.compileCraftBukkit = compileCraftBukkitOption.isSelected());
+        compileCraftBukkitOption.addActionListener(e -> BuildToolsOptions.compileCraftBukkit = compileCraftBukkitOption.isSelected());
         super.add(compileCraftBukkitOption);
 
         compileNothingOption.setBounds(400, 180, 200, 20);
@@ -109,7 +108,7 @@ public class BuildToolsOptionsPanel extends JPanel {
             compileSpigotOption.setEnabled(!compileNothingOption.isSelected());
             compileCraftBukkitOption.setEnabled(!compileNothingOption.isSelected());
 
-            BTOptions.compileNothing = compileNothingOption.isSelected();
+            BuildToolsOptions.compileNothing = compileNothingOption.isSelected();
         });
         super.add(compileNothingOption);
 
@@ -118,7 +117,7 @@ public class BuildToolsOptionsPanel extends JPanel {
         revision.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BTOptions.revision = revision.getText();
+                BuildToolsOptions.revision = revision.getText();
             }
         });
         super.add(revision);
@@ -128,7 +127,7 @@ public class BuildToolsOptionsPanel extends JPanel {
         pullRequests.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BTOptions.pullRequests = pullRequests.getText();
+                BuildToolsOptions.pullRequests = pullRequests.getText();
             }
         });
         super.add(pullRequests);
@@ -138,8 +137,8 @@ public class BuildToolsOptionsPanel extends JPanel {
         outputDirectory.setEditable(false);
         super.add(outputDirectory);
 
-        chooseOutputDirBtn.setBounds(300, 220, 200, 20);
-        chooseOutputDirBtn.addActionListener(e -> {
+        chooseOutputDir.setBounds(300, 220, 200, 20);
+        chooseOutputDir.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser(BuildToolsGUI.CURRENT_DIRECTORY);
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
@@ -147,9 +146,9 @@ public class BuildToolsOptionsPanel extends JPanel {
             File dir = chooser.getSelectedFile();
             if (dir == null) return;
 
-            BTOptions.outputDirectory = dir.getAbsolutePath();
-            outputDirectory.setText(BTOptions.outputDirectory);
+            BuildToolsOptions.outputDirectory = dir.getAbsolutePath();
+            outputDirectory.setText(BuildToolsOptions.outputDirectory);
         });
-        super.add(chooseOutputDirBtn);
+        super.add(chooseOutputDir);
     }
 }
