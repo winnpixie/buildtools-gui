@@ -1,3 +1,3 @@
 # BuildTools GUI
-A graphical user interface for [SpigotMC](https://spigotmc.org/)'
-s [BuildTools](https://hub.spigotmc.org/jenkins/job/BuildTools/) software. 
+An unofficial front-end wrapper for [SpigotMC's](https://spigotmc.org/)
+[BuildTools](https://hub.spigotmc.org/jenkins/job/BuildTools/) software.
