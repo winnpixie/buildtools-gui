@@ -45,15 +45,12 @@ public class BuildToolsOptionsPanel extends JPanel {
     }
 
     private void populateWithComponents() {
-        // Server
         super.add(SwingHelper.createLabel("Server Development", 0, 0, 200, 20));
         this.addServerOptions();
 
-        // Plugins
         super.add(SwingHelper.createLabel("Plugin Development", 0, 180, 200, 20));
         this.addPluginOptions();
 
-        // Advanced Options
         super.add(SwingHelper.createLabel("Advanced Options", 0, 280, 200, 20));
         this.addAdvancedOptions();
     }

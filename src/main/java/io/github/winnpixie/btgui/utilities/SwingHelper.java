@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class SwingHelper {
     public static JLabel createLabel(String text, int x, int y, int width, int height) {
-        JLabel label = new JLabel(text);
+        JLabel label = new JLabel(String.format("<html>%s</html>", text));
         label.setBounds(x, y, width, height);
 
         return label;

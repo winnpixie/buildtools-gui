@@ -2,6 +2,7 @@ package io.github.winnpixie.btgui.window;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.window.panels.BuildToolsOptionsPanel;
+import io.github.winnpixie.btgui.window.panels.CreditsPanel;
 import io.github.winnpixie.btgui.window.panels.ProcessingPanel;
 import io.github.winnpixie.btgui.window.panels.ProgramOptionsPanel;
 
@@ -61,6 +62,7 @@ public class BTGUIWindow extends JFrame {
         tabsPane.add("Program Options", new ProgramOptionsPanel());
         tabsPane.add("BuildTools Options", new BuildToolsOptionsPanel());
         tabsPane.add("Output", new ProcessingPanel());
+        tabsPane.add("Credits", new CreditsPanel());
 
         super.add(tabsPane);
     }
