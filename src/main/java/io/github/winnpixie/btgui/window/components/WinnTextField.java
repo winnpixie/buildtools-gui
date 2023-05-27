@@ -1,32 +1,32 @@
-package io.github.winnpixie.btgui.window;
+package io.github.winnpixie.btgui.window.components;
 
 import javax.swing.*;
 import javax.swing.text.Document;
 import java.awt.*;
 
-public class JTextFieldWithPlaceholder extends JTextField {
+public class WinnTextField extends JTextField {
     private String placeholder;
 
-    public JTextFieldWithPlaceholder(String placeholder) {
+    public WinnTextField(String placeholder) {
         this.placeholder = placeholder;
     }
 
-    public JTextFieldWithPlaceholder(String text, String placeholder) {
+    public WinnTextField(String text, String placeholder) {
         super(text);
         this.placeholder = placeholder;
     }
 
-    public JTextFieldWithPlaceholder(int columns, String placeholder) {
+    public WinnTextField(int columns, String placeholder) {
         super(columns);
         this.placeholder = placeholder;
     }
 
-    public JTextFieldWithPlaceholder(String text, int columns, String placeholder) {
+    public WinnTextField(String text, int columns, String placeholder) {
         super(text, columns);
         this.placeholder = placeholder;
     }
 
-    public JTextFieldWithPlaceholder(Document doc, String text, int columns, String placeholder) {
+    public WinnTextField(Document doc, String text, int columns, String placeholder) {
         super(doc, text, columns);
         this.placeholder = placeholder;
     }

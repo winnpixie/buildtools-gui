@@ -9,15 +9,15 @@ import java.net.URL;
 
 public class IOHelper {
     public static byte[] getBytes(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         int read;
 
         while ((read = is.read(buffer)) != -1) {
-            baos.write(buffer, 0, read);
+            dataStream.write(buffer, 0, read);
         }
 
-        return baos.toByteArray();
+        return dataStream.toByteArray();
     }
 
     public static byte[] getBytes(String url) throws IOException {
@@ -25,6 +25,7 @@ public class IOHelper {
 
         try {
             conn = (HttpURLConnection) (new URL(url)).openConnection();
+            conn.setRequestProperty("User-Agent", "Java/BT-GUI ( https://github.com/winnpixie/bt-gui/ )");
 
             try (InputStream is = conn.getInputStream()) {
                 return getBytes(is);

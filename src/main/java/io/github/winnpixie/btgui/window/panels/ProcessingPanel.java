@@ -4,18 +4,19 @@ import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.config.BuildToolsOptions;
 import io.github.winnpixie.btgui.config.ProgramOptions;
 import io.github.winnpixie.btgui.utilities.IOHelper;
-import io.github.winnpixie.btgui.window.JTextFieldWithPlaceholder;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 
 public class ProcessingPanel extends JPanel {
-    private final JTextField commandToRun = new JTextFieldWithPlaceholder("Click \"Preview\" to preview what BuildTools will run.");
-    private final JButton prepareBtn = new JButton("Preview");
-    private final JButton runBtn = new JButton("Run");
-    private final JTextArea outputLog = new JTextArea();
+    private final JButton prepareBtn = new JButton("Preview Command");
+    private final JButton runBtn = new JButton("Run BuildTools");
+    private final JTextArea outputField = new JTextArea();
 
     public ProcessingPanel() {
         super();
@@ -25,30 +26,38 @@ public class ProcessingPanel extends JPanel {
     }
 
     private void setOutputText(String text) {
-        outputLog.setText(text);
-        if (!text.isEmpty()) BuildToolsGUI.LOGGER.info(text);
+        outputField.setText(text);
+        if (!text.trim().isEmpty()) BuildToolsGUI.LOGGER.info(text);
     }
 
     private void appendToLog(String text) {
-        outputLog.append(String.format("%s%n", text));
-        if (text.isEmpty()) BuildToolsGUI.LOGGER.info(text);
+        outputField.append(String.format("%s%n", text));
+        if (!text.trim().isEmpty()) BuildToolsGUI.LOGGER.info(text);
     }
 
     private void populateWithComponents() {
-        commandToRun.setBounds(0, 0, 400, 20);
-        commandToRun.setToolTipText("The command that will run BuildTools.jar");
-        commandToRun.setEditable(false);
-        super.add(commandToRun);
+        prepareBtn.setBounds(0, 0, 300, 20);
+        prepareBtn.addActionListener(e -> {
+            String javaCommand = String.join(" ", ProgramOptions.buildJavaCommand());
+            String buildToolsArgs = String.join(" ", BuildToolsOptions.buildArguments());
+            setOutputText("Java Command:\n");
+            appendToLog(javaCommand);
 
-        prepareBtn.setBounds(400, 0, 100, 20);
-        prepareBtn.addActionListener(e -> commandToRun.setText(String.join(" ", BuildToolsOptions.buildArguments())));
+            appendToLog("\nBuildTools Arguments:");
+            appendToLog(buildToolsArgs);
+
+            appendToLog("\nFull Command:");
+            appendToLog(String.format("%s %s", javaCommand, buildToolsArgs));
+        });
         super.add(prepareBtn);
 
-        runBtn.setBounds(500, 0, 100, 20);
+        runBtn.setBounds(300, 0, 300, 20);
         runBtn.addActionListener(e -> new Thread(() -> {
-            setOutputText(""); // Clear output log
+            BuildToolsGUI.RUNNING = true;
 
-            // Download BuildTools from SpigotMC Jenkins
+            runBtn.setEnabled(false);
+            setOutputText("");
+
             File buildToolsFile = new File(BuildToolsGUI.CURRENT_DIRECTORY, "BuildTools.jar");
             if (ProgramOptions.downloadBuildTools) {
                 try {
@@ -56,6 +65,9 @@ public class ProcessingPanel extends JPanel {
                     byte[] btData = IOHelper.getBytes("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar");
                     Files.write(buildToolsFile.toPath(), btData);
                 } catch (IOException ex) {
+                    BuildToolsGUI.RUNNING = false;
+
+                    runBtn.setEnabled(true);
                     appendToLog("Failed to download or save BuildTools.jar, short-circuiting!");
 
                     ex.printStackTrace();
@@ -63,7 +75,6 @@ public class ProcessingPanel extends JPanel {
                 }
             }
 
-            // Create Run Directory
             File runDir = new File(BuildToolsGUI.CURRENT_DIRECTORY, "run");
             if (ProgramOptions.isolateRuns) {
                 runDir = new File(BuildToolsGUI.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
@@ -72,40 +83,45 @@ public class ProcessingPanel extends JPanel {
             if (!runDir.exists()) runDir.mkdir();
             appendToLog(String.format("Created run directory @ %s", runDir.getAbsolutePath()));
 
+            appendToLog("Copying BuildTools.jar to run directory");
             try {
-                appendToLog("Copying BuildTools.jar to run directory");
-                // Copy BuildTools to Run directory
                 File buildToolsCopy = new File(runDir, "BuildTools.jar");
                 Files.copy(buildToolsFile.toPath(), buildToolsCopy.toPath());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
 
-                // Build process
-                ProcessBuilder procBuilder = new ProcessBuilder()
-                        .command(String.format("\"%s%cbin%cjava\"", ProgramOptions.javaHome, File.separatorChar, File.separatorChar),
-                                String.format("-Xms%s", ProgramOptions.heapSize),
-                                String.format("-Xmx%s", ProgramOptions.heapSize),
-                                "-jar",
-                                "BuildTools.jar"
-                        )
-                        .directory(runDir)
-                        .inheritIO();
-                procBuilder.command().addAll(BuildToolsOptions.buildArguments());
-                procBuilder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
+            appendToLog("\nJava Command:");
+            appendToLog(String.join(" ", ProgramOptions.buildJavaCommand()));
 
-                appendToLog("Running BuildTools.jar");
-                appendToLog("BuildTools Command:");
-                appendToLog(String.join(" ", BuildToolsOptions.buildArguments()));
-                appendToLog("");
-                appendToLog("Full Command:");
-                appendToLog(String.join(" ", procBuilder.command()));
-                appendToLog("Please wait...");
+            appendToLog("\nBuildTools Arguments:");
+            appendToLog(String.join(" ", BuildToolsOptions.buildArguments()));
+            try {
 
-                // Start process and wait to finish
-                Process proc = procBuilder.start();
-                proc.waitFor();
+                ProcessBuilder btProcBuilder = new ProcessBuilder()
+                        .command(ProgramOptions.buildJavaCommand())
+                        .directory(runDir);
+                btProcBuilder.command().addAll(BuildToolsOptions.buildArguments());
+                btProcBuilder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
+
+                appendToLog("\nFull Command:");
+                appendToLog(String.join(" ", btProcBuilder.command()));
+
+                appendToLog("\nPlease wait for BuildTools to finish...\n");
+                Process btProcess = btProcBuilder.start();
+
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(btProcess.getInputStream()))) {
+                    br.lines().forEach(this::appendToLog);
+                }
+
+                btProcess.waitFor();
             } catch (IOException | InterruptedException ex) {
                 ex.printStackTrace();
             } finally {
+                BuildToolsGUI.RUNNING = false;
+
                 appendToLog("Completed (hopefully) without errors!");
+                runBtn.setEnabled(true);
 
                 // (optionally) Clean up after ourselves :)
                 if (ProgramOptions.deleteRunOnFinish) {
@@ -116,10 +132,13 @@ public class ProcessingPanel extends JPanel {
         }).start());
         super.add(runBtn);
 
-        outputLog.setBounds(0, 20, 620, 420);
-        outputLog.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(outputLog);
-        scrollPane.setBounds(outputLog.getBounds());
+        outputField.setBounds(0, 20, 620, 420);
+        outputField.setEditable(false);
+        DefaultCaret caret = (DefaultCaret) outputField.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        JScrollPane scrollPane = new JScrollPane(outputField);
+        scrollPane.setBounds(outputField.getBounds());
+        scrollPane.setAutoscrolls(true);
         super.add(scrollPane);
     }
 }
