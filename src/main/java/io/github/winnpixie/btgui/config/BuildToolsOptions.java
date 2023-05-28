@@ -1,6 +1,7 @@
 package io.github.winnpixie.btgui.config;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
+import io.github.winnpixie.btgui.utilities.OSHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +69,7 @@ public class BuildToolsOptions {
         }
 
         arguments.add("--output-dir");
-        arguments.add(String.format("\"%s\"", outputDirectory));
+        arguments.add(OSHelper.getPlatform().getPathFormatter().apply(outputDirectory));
 
         return arguments;
     }

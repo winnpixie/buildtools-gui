@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 public class BuildToolsGUI {
-    public static final String VERSION = "0.0.1";
+    public static final String VERSION = "0.0.2";
     public static final Logger LOGGER = Logger.getLogger(BuildToolsGUI.class.getName());
     public static final File CURRENT_DIRECTORY = new File(System.getProperty("user.dir", "."));
 

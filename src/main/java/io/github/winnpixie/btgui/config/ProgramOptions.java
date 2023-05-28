@@ -1,5 +1,7 @@
 package io.github.winnpixie.btgui.config;
 
+import io.github.winnpixie.btgui.utilities.OSHelper;
+
 import java.io.File;
 
 public class ProgramOptions {
@@ -18,8 +20,11 @@ public class ProgramOptions {
     }
 
     public static String[] buildJavaCommand() {
+        String javaPath = OSHelper.getPlatform().getPathFormatter()
+                .apply(String.format("%s%cbin%cjava", ProgramOptions.javaHome, File.separatorChar, File.separatorChar));
+
         return new String[]{
-                String.format("\"%s%cbin%cjava\"", ProgramOptions.javaHome, File.separatorChar, File.separatorChar),
+                javaPath,
                 String.format("-Xms%s", ProgramOptions.heapSize),
                 String.format("-Xmx%s", ProgramOptions.heapSize),
                 "-jar",
