@@ -6,38 +6,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 
 public class IOHelper {
-    public static byte[] getBytes(InputStream is) throws IOException {
-        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+    public static byte[] getBytes(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         int read;
 
-        while ((read = is.read(buffer)) != -1) {
-            dataStream.write(buffer, 0, read);
+        while ((read = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, read);
         }
 
-        return dataStream.toByteArray();
+        return outputStream.toByteArray();
     }
 
     public static byte[] getBytes(String url) throws IOException {
-        HttpURLConnection conn = null;
+        HttpURLConnection connection = null;
 
         try {
-            conn = (HttpURLConnection) (new URL(url)).openConnection();
-            conn.setRequestProperty("User-Agent", "Java/BT-GUI ( https://github.com/winnpixie/bt-gui/ )");
+            connection = (HttpURLConnection) (new URL(url)).openConnection();
+            connection.setRequestProperty("User-Agent", "Java/BT-GUI ( https://github.com/winnpixie/bt-gui/ )");
 
-            try (InputStream is = conn.getInputStream()) {
-                return getBytes(is);
+            try (InputStream inputStream = connection.getInputStream()) {
+                return getBytes(inputStream);
             }
         } finally {
-            if (conn != null) {
-                conn.disconnect();
+            if (connection != null) {
+                connection.disconnect();
             }
         }
     }
 
-    public static void delete(File file) {
+    public static void delete(File file) throws IOException {
         if (file.isDirectory()) {
             File[] children = file.listFiles();
             if (children != null) {
@@ -47,6 +48,6 @@ public class IOHelper {
             }
         }
 
-        file.delete();
+        Files.deleteIfExists(file.toPath());
     }
 }

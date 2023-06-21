@@ -1,8 +1,8 @@
 package io.github.winnpixie.btgui.window;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
+import io.github.winnpixie.btgui.window.panels.AboutPanel;
 import io.github.winnpixie.btgui.window.panels.BuildToolsOptionsPanel;
-import io.github.winnpixie.btgui.window.panels.CreditsPanel;
 import io.github.winnpixie.btgui.window.panels.ProcessingPanel;
 import io.github.winnpixie.btgui.window.panels.ProgramOptionsPanel;
 
@@ -15,8 +15,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class BTGUIWindow extends JFrame {
-    public BTGUIWindow() throws HeadlessException {
-        super(String.format("BuildTools GUI (v%s) - https://github.com/winnpixie/bt-gui/", BuildToolsGUI.VERSION));
+    private final int windowWidth;
+    private final int windowHeight;
+
+    public BTGUIWindow(int width, int height) throws HeadlessException {
+        super(String.format("BuildTools GUI (v%s) - An unofficial BuildTools Frontend", BuildToolsGUI.VERSION));
+
+        this.windowWidth = width;
+        this.windowHeight = height;
 
         this.configureWindow();
         this.populateWithComponents();
@@ -26,14 +32,14 @@ public class BTGUIWindow extends JFrame {
     public void configureWindow() {
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
         super.setResizable(false);
-        super.setPreferredSize(new Dimension(640, 480));
+        super.setPreferredSize(new Dimension(windowWidth, windowHeight));
 
         super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 if (BuildToolsGUI.RUNNING) {
                     BTGUIWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-                    JOptionPane.showMessageDialog(BTGUIWindow.this, "Please wait for BuildTools to finish before closing the GUI!");
+                    JOptionPane.showMessageDialog(BTGUIWindow.this, "Please wait for BuildTools to finish before exiting the program.");
                 } else {
                     BTGUIWindow.super.setDefaultCloseOperation(EXIT_ON_CLOSE);
                 }
@@ -47,13 +53,6 @@ public class BTGUIWindow extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        try {
-            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException |
-                 IllegalAccessException e) {
-            e.printStackTrace();
-        }
     }
 
     public void populateWithComponents() {
@@ -62,7 +61,7 @@ public class BTGUIWindow extends JFrame {
         tabsPane.add("Program Options", new ProgramOptionsPanel());
         tabsPane.add("BuildTools Options", new BuildToolsOptionsPanel());
         tabsPane.add("Output", new ProcessingPanel());
-        tabsPane.add("Credits", new CreditsPanel());
+        tabsPane.add("About", new AboutPanel());
 
         super.add(tabsPane);
     }

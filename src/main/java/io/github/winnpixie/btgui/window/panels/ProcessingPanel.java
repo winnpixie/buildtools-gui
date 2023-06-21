@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.util.List;
 
 public class ProcessingPanel extends JPanel {
     private final JButton prepareBtn = new JButton("Preview Command");
@@ -36,7 +37,7 @@ public class ProcessingPanel extends JPanel {
     }
 
     private void populateWithComponents() {
-        prepareBtn.setBounds(0, 0, 300, 20);
+        prepareBtn.setBounds(5, 5, 465, 25);
         prepareBtn.addActionListener(e -> {
             String javaCommand = String.join(" ", ProgramOptions.buildJavaCommand());
             String buildToolsArgs = String.join(" ", BuildToolsOptions.buildArguments());
@@ -51,7 +52,7 @@ public class ProcessingPanel extends JPanel {
         });
         super.add(prepareBtn);
 
-        runBtn.setBounds(300, 0, 300, 20);
+        runBtn.setBounds(475, 5, 465, 25);
         runBtn.addActionListener(e -> new Thread(() -> {
             BuildToolsGUI.RUNNING = true;
 
@@ -60,79 +61,95 @@ public class ProcessingPanel extends JPanel {
 
             File buildToolsFile = new File(BuildToolsGUI.CURRENT_DIRECTORY, "BuildTools.jar");
             if (ProgramOptions.downloadBuildTools) {
-                try {
-                    appendToLog("Downloading BuildTools.jar from https://hub.spigotmc.org/");
-                    byte[] btData = IOHelper.getBytes("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar");
-                    Files.write(buildToolsFile.toPath(), btData);
-                } catch (IOException ex) {
-                    BuildToolsGUI.RUNNING = false;
+                appendToLog("Downloading BuildTools.jar from https://hub.spigotmc.org/");
+                byte[] buildToolsData = downloadBuildTools();
+                if (buildToolsData.length == 0) {
+                    resetRunStatus();
 
-                    runBtn.setEnabled(true);
-                    appendToLog("Failed to download or save BuildTools.jar, short-circuiting!");
-
-                    ex.printStackTrace();
+                    appendToLog("\nCould not download BuildTools, stopping!");
                     return;
                 }
+
+                if (!saveBuildTools(buildToolsFile, buildToolsData)) {
+                    resetRunStatus();
+
+                    appendToLog("\nCould not save BuildTools.jar to storage device, stopping!");
+                    return;
+                }
+
+                appendToLog("Downloaded and saved BuildTools.jar to storage device.");
             }
 
+            appendToLog("\nCreating run directory");
             File runDir = new File(BuildToolsGUI.CURRENT_DIRECTORY, "run");
             if (ProgramOptions.isolateRuns) {
                 runDir = new File(BuildToolsGUI.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
             }
 
-            if (!runDir.exists()) runDir.mkdir();
-            appendToLog(String.format("Created run directory @ %s", runDir.getAbsolutePath()));
+            if (!runDir.exists() && !runDir.mkdir()) {
+                resetRunStatus();
 
-            appendToLog("Copying BuildTools.jar to run directory");
-            try {
-                File buildToolsCopy = new File(runDir, "BuildTools.jar");
-                Files.copy(buildToolsFile.toPath(), buildToolsCopy.toPath());
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                appendToLog("\nCould not create run directory, stopping!");
+                return;
+            }
+
+            appendToLog(String.format("Created run directory @ %s", runDir.getPath()));
+
+            appendToLog("\nCopying BuildTools.jar to run directory");
+            if (!copyBuildToolsToRunDirectory(buildToolsFile, runDir)) {
+                resetRunStatus();
+
+                appendToLog("Could not copy BuildTools.jar to run directory!");
+                return;
             }
 
             appendToLog("\nJava Command:");
-            appendToLog(String.join(" ", ProgramOptions.buildJavaCommand()));
+            String[] javaCommand = ProgramOptions.buildJavaCommand();
+            appendToLog(String.join(" ", javaCommand));
 
             appendToLog("\nBuildTools Arguments:");
-            appendToLog(String.join(" ", BuildToolsOptions.buildArguments()));
+            List<String> buildToolsArguments = BuildToolsOptions.buildArguments();
+            appendToLog(String.join(" ", buildToolsArguments));
+
+            appendToLog("\nFull Command:");
+            ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runDir, buildToolsArguments);
+            appendToLog(String.join(" ", buildToolsProcessBuilder.command()));
+
+            appendToLog("\nPlease wait for BuildTools to finish...");
             try {
+                Process buildToolsProcess = buildToolsProcessBuilder.start();
 
-                ProcessBuilder btProcBuilder = new ProcessBuilder()
-                        .command(ProgramOptions.buildJavaCommand())
-                        .directory(runDir);
-                btProcBuilder.command().addAll(BuildToolsOptions.buildArguments());
-                btProcBuilder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
-
-                appendToLog("\nFull Command:");
-                appendToLog(String.join(" ", btProcBuilder.command()));
-
-                appendToLog("\nPlease wait for BuildTools to finish...\n");
-                Process btProcess = btProcBuilder.start();
-
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(btProcess.getInputStream()))) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
                     br.lines().forEach(this::appendToLog);
                 }
 
-                btProcess.waitFor();
+                buildToolsProcess.waitFor();
             } catch (IOException | InterruptedException ex) {
                 ex.printStackTrace();
             } finally {
-                BuildToolsGUI.RUNNING = false;
-
-                appendToLog("Completed (hopefully) without errors!");
-                runBtn.setEnabled(true);
-
                 // (optionally) Clean up after ourselves :)
                 if (ProgramOptions.deleteRunOnFinish) {
-                    appendToLog("Cleaning up...");
-                    IOHelper.delete(runDir);
+                    appendToLog("\nCleaning up...");
+
+                    try {
+                        IOHelper.delete(runDir);
+
+                        appendToLog("Finished.");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+
+                        appendToLog("\nCould not delete run directory.");
+                    }
                 }
+
+                resetRunStatus();
+
+                appendToLog("\nCompleted (hopefully) without errors!");
             }
         }).start());
         super.add(runBtn);
 
-        outputField.setBounds(0, 20, 620, 420);
+        outputField.setBounds(5, 35, 935, 530);
         outputField.setEditable(false);
         DefaultCaret caret = (DefaultCaret) outputField.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
@@ -140,5 +157,56 @@ public class ProcessingPanel extends JPanel {
         scrollPane.setBounds(outputField.getBounds());
         scrollPane.setAutoscrolls(true);
         super.add(scrollPane);
+    }
+
+    private void resetRunStatus() {
+        BuildToolsGUI.RUNNING = false;
+
+        runBtn.setEnabled(true);
+    }
+
+    private byte[] downloadBuildTools() {
+        try {
+            return IOHelper.getBytes("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new byte[0];
+    }
+
+    private boolean saveBuildTools(File buildToolsFile, byte[] binData) {
+        try {
+            Files.write(buildToolsFile.toPath(), binData);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private boolean copyBuildToolsToRunDirectory(File originalBuildTools, File runDirectory) {
+        try {
+            File buildToolsCopy = new File(runDirectory, "BuildTools.jar");
+            Files.copy(originalBuildTools.toPath(), buildToolsCopy.toPath());
+
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private ProcessBuilder buildProcess(String[] javaCommand, File workingDirectory, List<String> buildToolsArguments) {
+        ProcessBuilder processBuilder = new ProcessBuilder()
+                .command(javaCommand)
+                .directory(workingDirectory)
+                .redirectErrorStream(true);
+        processBuilder.command().addAll(buildToolsArguments);
+        processBuilder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
+
+        return processBuilder;
     }
 }

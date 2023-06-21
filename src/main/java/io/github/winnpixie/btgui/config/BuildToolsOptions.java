@@ -16,6 +16,7 @@ public class BuildToolsOptions {
     public static boolean generateSourcesJar = false; // generate-source
     public static boolean generateJavadocsJar = false; // generate-docs
     public static boolean developerMode = false; // dev
+    public static boolean experimentalMode = false; // experimental
     public static boolean remapped = false; // remapped
     public static boolean compileIfChanged = false; // compile-if-changed
 
@@ -36,10 +37,11 @@ public class BuildToolsOptions {
         if (generateSourcesJar) arguments.add("--generate-source");
         if (generateJavadocsJar) arguments.add("--generate-docs");
         if (developerMode) arguments.add("--dev");
+        if (experimentalMode) arguments.add("--experimental");
         if (remapped) arguments.add("--remapped");
         if (compileIfChanged) arguments.add("--compile-if-changed");
 
-        if (!skipGitPull && !developerMode) {
+        if (!skipGitPull && !developerMode && !experimentalMode) {
             arguments.add("--rev");
             arguments.add(revision);
         }
