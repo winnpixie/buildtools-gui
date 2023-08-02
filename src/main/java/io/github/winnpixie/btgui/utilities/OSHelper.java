@@ -1,5 +1,8 @@
 package io.github.winnpixie.btgui.utilities;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.function.Function;
 
 public class OSHelper {
@@ -17,8 +20,23 @@ public class OSHelper {
         return platform;
     }
 
+    public static void showDirectory(File file) {
+        try {
+            Desktop.getDesktop().open(file);
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Desktop.getDesktop().browse(file.toURI());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public enum Platform {
-        WINDOWS(path -> String.format("\"%s\"", path)),
+        WINDOWS(path -> path.indexOf(' ') < 0 ? path : String.format("\"%s\"", path)),
         UNIX(path -> path.replace(" ", "\\ "));
 
         private final Function<String, String> pathFormatter;

@@ -1,4 +1,4 @@
-package io.github.winnpixie.btgui.window.panels;
+package io.github.winnpixie.btgui.ui.windows.main.panels;
 
 import io.github.winnpixie.btgui.utilities.SwingHelper;
 

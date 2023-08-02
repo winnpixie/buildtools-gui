@@ -1,10 +1,10 @@
-package io.github.winnpixie.btgui.window;
+package io.github.winnpixie.btgui.ui.windows.main;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
-import io.github.winnpixie.btgui.window.panels.AboutPanel;
-import io.github.winnpixie.btgui.window.panels.BuildToolsOptionsPanel;
-import io.github.winnpixie.btgui.window.panels.ProcessingPanel;
-import io.github.winnpixie.btgui.window.panels.ProgramOptionsPanel;
+import io.github.winnpixie.btgui.ui.windows.main.panels.AboutPanel;
+import io.github.winnpixie.btgui.ui.windows.main.panels.BuildToolsOptionsPanel;
+import io.github.winnpixie.btgui.ui.windows.main.panels.ProcessingPanel;
+import io.github.winnpixie.btgui.ui.windows.main.panels.ProgramOptionsPanel;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -14,11 +14,13 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BTGUIWindow extends JFrame {
+public class MainWindow extends JFrame {
+    public static Image WINDOW_ICON;
+
     private final int windowWidth;
     private final int windowHeight;
 
-    public BTGUIWindow(int width, int height) throws HeadlessException {
+    public MainWindow(int width, int height) throws HeadlessException {
         super(String.format("BuildTools GUI (v%s) - An unofficial BuildTools Frontend", BuildToolsGUI.VERSION));
 
         this.windowWidth = width;
@@ -37,18 +39,18 @@ public class BTGUIWindow extends JFrame {
         super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (BuildToolsGUI.RUNNING) {
-                    BTGUIWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-                    JOptionPane.showMessageDialog(BTGUIWindow.this, "Please wait for BuildTools to finish before exiting the program.");
+                if (BuildToolsGUI.getActiveBuilds() > 0) {
+                    MainWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+                    JOptionPane.showMessageDialog(MainWindow.this, "Please wait for ALL BuildTools tasks to finish before exiting the program.");
                 } else {
-                    BTGUIWindow.super.setDefaultCloseOperation(EXIT_ON_CLOSE);
+                    MainWindow.super.setDefaultCloseOperation(EXIT_ON_CLOSE);
                 }
             }
         });
 
         try (InputStream is = this.getClass().getResourceAsStream("/bt-gui-SMALL.png")) {
             if (is != null) {
-                super.setIconImage(ImageIO.read(is));
+                super.setIconImage(WINDOW_ICON = ImageIO.read(is));
             }
         } catch (IOException e) {
             e.printStackTrace();

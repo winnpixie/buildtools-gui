@@ -39,15 +39,16 @@ public class IOHelper {
     }
 
     public static void delete(File file) throws IOException {
-        if (file.isDirectory()) {
-            File[] children = file.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    delete(child);
-                }
-            }
+        if (!file.isDirectory()) {
+            Files.deleteIfExists(file.toPath());
+            return;
         }
 
-        Files.deleteIfExists(file.toPath());
+        File[] children = file.listFiles();
+        if (children == null) return;
+
+        for (File child : children) {
+            delete(child);
+        }
     }
 }

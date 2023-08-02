@@ -70,8 +70,10 @@ public class BuildToolsOptions {
             arguments.add("SPIGOT");
         }
 
-        arguments.add("--output-dir");
-        arguments.add(OSHelper.getPlatform().getPathFormatter().apply(outputDirectory));
+        if (!outputDirectory.isEmpty()) {
+            arguments.add("--output-dir");
+            arguments.add(OSHelper.getPlatform().getPathFormatter().apply(outputDirectory));
+        }
 
         return arguments;
     }

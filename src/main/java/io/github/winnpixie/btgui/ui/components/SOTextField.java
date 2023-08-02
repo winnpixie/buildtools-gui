@@ -1,4 +1,4 @@
-package io.github.winnpixie.btgui.window.components;
+package io.github.winnpixie.btgui.ui.components;
 
 import javax.swing.*;
 import javax.swing.text.Document;
@@ -45,7 +45,7 @@ public class SOTextField extends JTextField {
         super.paintComponent(g);
 
         Graphics2D g2d = (Graphics2D) g.create();
-        if (getText().length() < 1) {
+        if (getText().isEmpty()) {
             g2d.setColor(super.getDisabledTextColor());
             g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g2d.drawString(placeholder, super.getInsets().left, super.getInsets().top + g.getFontMetrics().getMaxAscent());

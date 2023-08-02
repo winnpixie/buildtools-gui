@@ -1,9 +1,9 @@
-package io.github.winnpixie.btgui.window.panels;
+package io.github.winnpixie.btgui.ui.windows.main.panels;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.config.BuildToolsOptions;
+import io.github.winnpixie.btgui.ui.components.SOTextField;
 import io.github.winnpixie.btgui.utilities.SwingHelper;
-import io.github.winnpixie.btgui.window.components.SOTextField;
 
 import javax.swing.*;
 import java.awt.event.KeyAdapter;
@@ -21,10 +21,10 @@ public class BuildToolsOptionsPanel extends JPanel {
     private final JCheckBox compileNothingOption = new JCheckBox("None", false);
 
     // Server - Version
-    private final JTextField revision = new SOTextField("latest", "Revision (ie. latest)");
-    private final JTextField pullRequests = new SOTextField("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
-    private final JTextField outputDirectory = new SOTextField(BuildToolsOptions.outputDirectory, "Output Directory");
-    private final JButton chooseOutputDir = new JButton("Browse...");
+    private final JTextField revisionField = new SOTextField("latest", "Revision (ie. latest)");
+    private final JTextField pullRequestsField = new SOTextField("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
+    private final JTextField outputDirField = new SOTextField(BuildToolsOptions.outputDirectory, "Output Directory");
+    private final JButton selectOutputDirButton = new JButton("Select Folder");
 
     // Plugins
     private final JCheckBox generateSourcesOption = new JCheckBox("Generate Sources JAR(s)", false);
@@ -63,12 +63,12 @@ public class BuildToolsOptionsPanel extends JPanel {
             BuildToolsOptions.skipGitPull = skipGitPullOption.isSelected();
 
             if (BuildToolsOptions.skipGitPull) {
-                revision.setEditable(false);
-                SwingHelper.setTooltip(revision, "Revisions can not be used with Experimental Mode, Developer Mode," +
+                revisionField.setEditable(false);
+                SwingHelper.setTooltip(revisionField, "Revisions can not be used with Experimental Mode, Developer Mode," +
                         "\nor when \"Don't Pull from Git\" is enabled.");
             } else if (!BuildToolsOptions.developerMode && !BuildToolsOptions.experimentalMode) {
-                revision.setEditable(true);
-                SwingHelper.setTooltip(revision, "BuildTools CLI Arg: --rev <REVISION>");
+                revisionField.setEditable(true);
+                SwingHelper.setTooltip(revisionField, "BuildTools CLI Arg: --rev &lt;revision&gt;");
             }
         });
         super.add(skipGitPullOption);
@@ -95,7 +95,7 @@ public class BuildToolsOptionsPanel extends JPanel {
 
         // None
         compileNothingOption.setBounds(190, 125, 75, 25);
-        SwingHelper.setTooltip(compileNothingOption, "BuildTools CLI Arg: --compile NONE (previously '--skip-compile')");
+        SwingHelper.setTooltip(compileNothingOption, "BuildTools CLI Arg: --compile NONE\n(previously '--skip-compile')");
         compileNothingOption.addActionListener(e -> {
             compileSpigotOption.setEnabled(!compileNothingOption.isSelected());
             compileCraftBukkitOption.setEnabled(!compileNothingOption.isSelected());
@@ -106,38 +106,37 @@ public class BuildToolsOptionsPanel extends JPanel {
 
         super.add(SwingHelper.createLabel("Revision/Version", 10, 150, 100, 25));
         // Revision
-        revision.setBounds(10, 175, 300, 25);
-        SwingHelper.setTooltip(revision, "BuildTools CLI Arg: --rev <REVISION>");
-        revision.addKeyListener(new KeyAdapter() {
+        revisionField.setBounds(10, 175, 300, 25);
+        SwingHelper.setTooltip(revisionField, "BuildTools CLI Arg: --rev &lt;revision&gt;");
+        revisionField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BuildToolsOptions.revision = revision.getText();
+                BuildToolsOptions.revision = revisionField.getText();
             }
         });
-        super.add(revision);
+        super.add(revisionField);
 
         super.add(SwingHelper.createLabel("Pull Request(s)", 315, 150, 100, 25));
         // Pull Requests
-        pullRequests.setBounds(315, 175, 300, 25);
-        SwingHelper.setTooltip(pullRequests, "BuildTools CLI Arg: --pull-request <REPO:ID>");
-        pullRequests.addKeyListener(new KeyAdapter() {
+        pullRequestsField.setBounds(315, 175, 300, 25);
+        SwingHelper.setTooltip(pullRequestsField, "BuildTools CLI Arg: --pull-request &lt;repo:id&gt;");
+        pullRequestsField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BuildToolsOptions.pullRequests = pullRequests.getText();
+                BuildToolsOptions.pullRequests = pullRequestsField.getText();
             }
         });
-        super.add(pullRequests);
+        super.add(pullRequestsField);
 
         super.add(SwingHelper.createLabel("Output Directory", 10, 200, 100, 25));
         // Output Directory
-        outputDirectory.setBounds(10, 225, 500, 25);
-        SwingHelper.setTooltip(outputDirectory, "BuildTools CLI Arg: --output-dir <DIR>");
-        outputDirectory.setEditable(false);
-        super.add(outputDirectory);
+        outputDirField.setBounds(10, 225, 500, 25);
+        SwingHelper.setTooltip(outputDirField, "BuildTools CLI Arg: --output-dir &lt;directory&gt;");
+        super.add(outputDirField);
 
         // Set Output Directory
-        chooseOutputDir.setBounds(515, 225, 100, 25);
-        chooseOutputDir.addActionListener(e -> {
+        selectOutputDirButton.setBounds(515, 225, 100, 25);
+        selectOutputDirButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser(BuildToolsGUI.CURRENT_DIRECTORY);
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
@@ -146,9 +145,9 @@ public class BuildToolsOptionsPanel extends JPanel {
             if (dir == null) return;
 
             BuildToolsOptions.outputDirectory = dir.getAbsolutePath();
-            outputDirectory.setText(BuildToolsOptions.outputDirectory);
+            outputDirField.setText(BuildToolsOptions.outputDirectory);
         });
-        super.add(chooseOutputDir);
+        super.add(selectOutputDirButton);
     }
 
     private void addPluginOptions() {
@@ -188,12 +187,12 @@ public class BuildToolsOptionsPanel extends JPanel {
             BuildToolsOptions.developerMode = developerModeOption.isSelected();
 
             if (BuildToolsOptions.developerMode) {
-                revision.setEditable(false);
-                SwingHelper.setTooltip(revision, "Revisions can not be used with Experimental Mode, Developer Mode," +
+                revisionField.setEditable(false);
+                SwingHelper.setTooltip(revisionField, "Revisions can not be used with Experimental Mode, Developer Mode," +
                         "\nor when \"Don't Pull from Git\" is enabled.");
             } else if (!BuildToolsOptions.skipGitPull && !BuildToolsOptions.experimentalMode) {
-                revision.setEditable(true);
-                SwingHelper.setTooltip(revision, "BuildTools CLI Arg: --rev <REVISION>");
+                revisionField.setEditable(true);
+                SwingHelper.setTooltip(revisionField, "BuildTools CLI Arg: --rev &lt;revision&gt;");
             }
         });
         super.add(developerModeOption);
@@ -205,12 +204,12 @@ public class BuildToolsOptionsPanel extends JPanel {
             BuildToolsOptions.experimentalMode = experimentalModeOption.isSelected();
 
             if (BuildToolsOptions.experimentalMode) {
-                revision.setEditable(false);
-                SwingHelper.setTooltip(revision, "Revisions can not be used with Experimental Mode, Developer Mode," +
+                revisionField.setEditable(false);
+                SwingHelper.setTooltip(revisionField, "Revisions can not be used with Experimental Mode, Developer Mode," +
                         "\nor when \"Don't Pull from Git\" is enabled.");
             } else if (!BuildToolsOptions.skipGitPull && !BuildToolsOptions.developerMode) {
-                revision.setEditable(true);
-                SwingHelper.setTooltip(revision, "BuildTools CLI Arg: --rev <REVISION>");
+                revisionField.setEditable(true);
+                SwingHelper.setTooltip(revisionField, "BuildTools CLI Arg: --rev &lt;revision&gt;");
             }
         });
         super.add(experimentalModeOption);
