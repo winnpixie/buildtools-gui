@@ -21,6 +21,8 @@ public class OSHelper {
     }
 
     public static void showDirectory(File file) {
+        if (!file.isDirectory()) return; // TODO: Is this... ever an issue?
+
         try {
             Desktop.getDesktop().open(file);
             return;

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /* BuildTools' options, derived from
-https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse/src/main/java/org/spigotmc/builder/Builder.java
+ * https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse/src/main/java/org/spigotmc/builder/Builder.java
  */
 public class BuildToolsOptions {
     public static boolean skipCertCheck = false; // disable-certificate-check
@@ -24,8 +24,8 @@ public class BuildToolsOptions {
     public static boolean compileCraftBukkit = false;
     public static boolean compileNothing = false;
 
-    public static String outputDirectory = BuildToolsGUI.CURRENT_DIRECTORY.getAbsolutePath(); // output-dir/o <DIRECTORY>
-    public static String revision = "latest"; // rev <REVISION>
+    public static String outputDirectory = BuildToolsGUI.CURRENT_DIRECTORY.getAbsolutePath(); // output-dir/o <DIR>
+    public static String revision = "latest"; // rev <VERSION>
     public static String pullRequests = ""; // pull-request/pr <REPO:ID>
 
     public static List<String> buildArguments() {

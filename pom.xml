@@ -5,12 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.winnpixie</groupId>
-    <artifactId>bt-gui</artifactId>
-    <version>0.0.4</version>
+    <artifactId>buildtools-gui</artifactId>
+    <version>0.0.5</version>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <javac.version>1.8</javac.version>
+        <maven.compiler.source>${javac.version}</maven.compiler.source>
+        <maven.compiler.target>${javac.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -24,6 +25,7 @@
     </dependencies>
 
     <build>
+        <finalName>BuildTools-GUI-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -31,7 +33,9 @@
                 <version>3.3.0</version>
                 <configuration>
                     <archive>
-                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                        <manifest>
+                            <mainClass>io.github.winnpixie.btgui.BuildToolsGUI</mainClass>
+                        </manifest>
                     </archive>
                 </configuration>
             </plugin>
@@ -46,8 +50,6 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <shadedArtifactAttached>false</shadedArtifactAttached>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <filters>
                                 <filter>
                                     <artifact>com.formdev:flatlaf</artifact>

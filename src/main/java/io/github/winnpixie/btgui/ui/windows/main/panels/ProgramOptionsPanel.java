@@ -22,7 +22,7 @@ public class ProgramOptionsPanel extends JPanel {
     private final JCheckBox deleteWorkDirOnFinishButton = new JCheckBox("Delete Run on Finish", false);
 
     private final JTextField javaHomeField = new SOTextField(ProgramOptions.javaHome, "JAVA_HOME");
-    private final JButton selectJavaHomeButton = new JButton("Select Folder");
+    private final JButton selectJavaHomeButton = new JButton("Select ...");
 
     private final JTextField jvmArgsField = new SOTextField(ProgramOptions.jvmArguments, "JVM Arguments");
 
@@ -32,7 +32,7 @@ public class ProgramOptionsPanel extends JPanel {
     public ProgramOptionsPanel() {
         super();
 
-        super.setLayout(null); // https://maven.apache.org/configure.html
+        super.setLayout(null);
         this.populateWithComponents();
     }
 

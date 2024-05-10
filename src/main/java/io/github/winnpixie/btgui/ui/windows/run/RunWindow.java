@@ -34,7 +34,7 @@ public class RunWindow extends JFrame {
         super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (executor.isRunning()) {
+                if (executor.isActive()) {
                     RunWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
                     JOptionPane.showMessageDialog(RunWindow.this, "Please wait for BuildTools to finish before closing this window.");
                 } else {

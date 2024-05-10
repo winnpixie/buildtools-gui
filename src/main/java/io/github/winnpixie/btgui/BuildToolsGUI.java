@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 public class BuildToolsGUI {
-    public static final String VERSION = "0.0.4";
+    public static final String VERSION = "0.0.5";
     public static final CustomLogger LOGGER = new CustomLogger(new JavaOutputDevice(Logger.getLogger(BuildToolsGUI.class.getName())));
     public static final File CURRENT_DIRECTORY = new File(System.getProperty("user.dir", "."));
 
@@ -29,11 +29,12 @@ public class BuildToolsGUI {
     }
 
     public static void main(String[] args) {
-        LOGGER.info("BEGIN bt-gui init");
+        LOGGER.info("BEGIN GUI init");
 
+        FlatDarkLaf.setPreferredFontFamily("Arial");
         FlatDarkLaf.setup();
         new MainWindow(960, 640);
 
-        LOGGER.info("END bt-gui init");
+        LOGGER.info("END GUI init");
     }
 }

@@ -24,7 +24,7 @@ public class BuildToolsOptionsPanel extends JPanel {
     private final JTextField revisionField = new SOTextField("latest", "Revision (ie. latest)");
     private final JTextField pullRequestsField = new SOTextField("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
     private final JTextField outputDirField = new SOTextField(BuildToolsOptions.outputDirectory, "Output Directory");
-    private final JButton selectOutputDirButton = new JButton("Select Folder");
+    private final JButton selectOutputDirButton = new JButton("Select ...");
 
     // Plugins
     private final JCheckBox generateSourcesOption = new JCheckBox("Generate Sources JAR(s)", false);
@@ -154,16 +154,19 @@ public class BuildToolsOptionsPanel extends JPanel {
         // Gen Sources
         generateSourcesOption.setBounds(10, 300, 200, 25);
         SwingHelper.setTooltip(generateSourcesOption, "BuildTools CLI Arg: --generate-source");
+        generateSourcesOption.addActionListener(e -> BuildToolsOptions.generateSourcesJar = generateSourcesOption.isSelected());
         super.add(generateSourcesOption);
 
         // Gen Javadocs
         generateJavadocsOption.setBounds(10, 325, 200, 25);
         SwingHelper.setTooltip(generateJavadocsOption, "BuildTools CLI Arg: --generate-docs");
+        generateJavadocsOption.addActionListener(e -> BuildToolsOptions.generateJavadocsJar = generateJavadocsOption.isSelected());
         super.add(generateJavadocsOption);
 
         // MVN Install Remapped
         remappedOption.setBounds(10, 350, 200, 25);
         SwingHelper.setTooltip(remappedOption, "BuildTools CLI Arg: --remapped");
+        remappedOption.addActionListener(e -> BuildToolsOptions.remapped = remappedOption.isSelected());
         super.add(remappedOption);
     }
 

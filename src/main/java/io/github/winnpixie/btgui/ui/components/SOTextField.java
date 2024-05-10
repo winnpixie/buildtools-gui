@@ -14,21 +14,25 @@ public class SOTextField extends JTextField {
 
     public SOTextField(String text, String placeholder) {
         super(text);
+
         this.placeholder = placeholder;
     }
 
     public SOTextField(int columns, String placeholder) {
         super(columns);
+
         this.placeholder = placeholder;
     }
 
     public SOTextField(String text, int columns, String placeholder) {
         super(text, columns);
+
         this.placeholder = placeholder;
     }
 
     public SOTextField(Document doc, String text, int columns, String placeholder) {
         super(doc, text, columns);
+
         this.placeholder = placeholder;
     }
 

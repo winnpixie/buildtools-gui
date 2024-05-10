@@ -9,32 +9,30 @@ import java.net.URL;
 import java.nio.file.Files;
 
 public class IOHelper {
-    public static byte[] getBytes(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    public static byte[] getBytes(InputStream streamIn) throws IOException {
+        ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         int read;
 
-        while ((read = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, read);
+        while ((read = streamIn.read(buffer)) != -1) {
+            streamOut.write(buffer, 0, read);
         }
 
-        return outputStream.toByteArray();
+        return streamOut.toByteArray();
     }
 
     public static byte[] getBytes(String url) throws IOException {
-        HttpURLConnection connection = null;
+        HttpURLConnection conn = null;
 
         try {
-            connection = (HttpURLConnection) (new URL(url)).openConnection();
-            connection.setRequestProperty("User-Agent", "Java/BT-GUI ( https://github.com/winnpixie/bt-gui/ )");
+            conn = (HttpURLConnection) (new URL(url)).openConnection();
+            conn.setRequestProperty("User-Agent", "Java/BT-GUI ( https://github.com/winnpixie/bt-gui/ )");
 
-            try (InputStream inputStream = connection.getInputStream()) {
+            try (InputStream inputStream = conn.getInputStream()) {
                 return getBytes(inputStream);
             }
         } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+            if (conn != null) conn.disconnect();
         }
     }
 

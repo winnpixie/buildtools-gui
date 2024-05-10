@@ -21,7 +21,7 @@ public class MainWindow extends JFrame {
     private final int windowHeight;
 
     public MainWindow(int width, int height) throws HeadlessException {
-        super(String.format("BuildTools GUI (v%s) - An unofficial BuildTools Frontend", BuildToolsGUI.VERSION));
+        super("BuildTools GUI");
 
         this.windowWidth = width;
         this.windowHeight = height;
@@ -48,7 +48,7 @@ public class MainWindow extends JFrame {
             }
         });
 
-        try (InputStream is = this.getClass().getResourceAsStream("/bt-gui-SMALL.png")) {
+        try (InputStream is = this.getClass().getResourceAsStream("/assets/icon-small.png")) {
             if (is != null) {
                 super.setIconImage(WINDOW_ICON = ImageIO.read(is));
             }

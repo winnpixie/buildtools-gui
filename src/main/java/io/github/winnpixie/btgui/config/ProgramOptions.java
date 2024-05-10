@@ -14,7 +14,7 @@ public class ProgramOptions {
     public static boolean deleteWorkDirOnFinish = false;
 
     public static String javaHome = getDefaultJavaHome();
-    public static String jvmArguments = "-Xms512M -Xmx1024M";
+    public static String jvmArguments = "-Xms1024M -Xmx1024M";
 
     public static String mavenOptions = getDefaultMavenOptions();
 

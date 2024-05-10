@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class BuildToolsExecutor {
@@ -19,7 +20,7 @@ public class BuildToolsExecutor {
     private final List<String> buildToolsArguments;
     private final CustomLogger logger = new CustomLogger();
 
-    private boolean running;
+    private boolean active;
 
     public BuildToolsExecutor(List<String> javaCommand, List<String> buildToolsArguments) {
         this.javaCommand = javaCommand;
@@ -38,24 +39,29 @@ public class BuildToolsExecutor {
         return logger;
     }
 
-    public boolean isRunning() {
-        return running;
+    public boolean isActive() {
+        return active;
     }
 
     public boolean run() {
-        running = true;
+        active = true;
 
         File buildToolsFile = new File(BuildToolsGUI.CURRENT_DIRECTORY, "BuildTools.jar");
         if (ProgramOptions.downloadBuildTools) {
             logger.info("Downloading BuildTools.jar from https://hub.spigotmc.org/");
+
             byte[] buildToolsData = downloadBuildTools();
             if (buildToolsData.length == 0) {
                 logger.error("Could not download BuildTools, stopping!");
+
+                active = false;
                 return false;
             }
 
             if (!saveBuildTools(buildToolsFile, buildToolsData)) {
                 logger.error("Could not save BuildTools.jar to storage device, stopping!");
+
+                active = false;
                 return false;
             }
         }
@@ -68,6 +74,8 @@ public class BuildToolsExecutor {
 
         if (!runDir.exists() && !runDir.mkdir()) {
             logger.error("Could not create run directory, stopping!");
+
+            active = false;
             return false;
         }
 
@@ -76,6 +84,8 @@ public class BuildToolsExecutor {
         logger.info("Copying BuildTools.jar to run directory");
         if (!copyBuildToolsToRunDirectory(buildToolsFile, runDir)) {
             logger.error("Could not copy BuildTools.jar to run directory!");
+
+            active = false;
             return false;
         }
 
@@ -94,13 +104,14 @@ public class BuildToolsExecutor {
             long startTime = System.nanoTime();
             Process buildToolsProcess = buildToolsProcessBuilder.start();
 
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
-                br.lines().forEach(logger::info);
+            while (buildToolsProcess.isAlive()) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
+                    br.lines().forEach(logger::info);
+                }
             }
 
-            buildToolsProcess.waitFor();
             logger.info(String.format("\nBuildTools took roughly %.3fs to complete.",
-                    (System.nanoTime() - startTime) / 1_000_000_000f));
+                    (System.nanoTime() - startTime) / 1_000_000_000.0));
 
             if (ProgramOptions.openOutputAfterFinish) {
                 logger.info(String.format("\nOpening %s in system file explorer...", BuildToolsOptions.outputDirectory));
@@ -108,7 +119,7 @@ public class BuildToolsExecutor {
             }
 
             return true;
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             logger.error(e);
             return false;
         } finally {
@@ -123,7 +134,7 @@ public class BuildToolsExecutor {
                 }
             }
 
-            running = false;
+            active = false;
         }
     }
 
@@ -132,9 +143,8 @@ public class BuildToolsExecutor {
             return IOHelper.getBytes("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar");
         } catch (IOException e) {
             logger.error(e);
+            return new byte[0];
         }
-
-        return new byte[0];
     }
 
     private boolean saveBuildTools(File buildToolsFile, byte[] binData) {
@@ -143,38 +153,35 @@ public class BuildToolsExecutor {
             return true;
         } catch (IOException e) {
             logger.error(e);
+            return false;
         }
-
-        return false;
     }
 
     private boolean copyBuildToolsToRunDirectory(File originalBuildTools, File runDirectory) {
         try {
             File buildToolsCopy = new File(runDirectory, "BuildTools.jar");
-            Files.copy(originalBuildTools.toPath(), buildToolsCopy.toPath());
-
+            Files.copy(originalBuildTools.toPath(), buildToolsCopy.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
             logger.error(e);
+            return false;
         }
-
-        return false;
     }
 
     private ProcessBuilder buildProcess(List<String> javaCommand, File workingDirectory, List<String> buildToolsArguments) {
-        ProcessBuilder processBuilder = new ProcessBuilder()
+        ProcessBuilder builder = new ProcessBuilder()
                 .command(javaCommand)
                 .directory(workingDirectory)
                 .redirectErrorStream(true);
-        processBuilder.command().addAll(buildToolsArguments);
+        builder.command().addAll(buildToolsArguments);
 
-        processBuilder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
+        builder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
 
         if (!ProgramOptions.mavenOptions.isEmpty()) {
-            processBuilder.environment().put("MAVEN_OPTS", ProgramOptions.mavenOptions);
+            builder.environment().put("MAVEN_OPTS", ProgramOptions.mavenOptions);
         }
 
-        return processBuilder;
+        return builder;
     }
 
     private boolean deleteRunDirectory(File directory) {
@@ -183,8 +190,7 @@ public class BuildToolsExecutor {
             return true;
         } catch (IOException e) {
             logger.error(e);
+            return false;
         }
-
-        return false;
     }
 }
