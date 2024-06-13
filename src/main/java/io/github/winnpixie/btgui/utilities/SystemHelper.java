@@ -3,24 +3,22 @@ package io.github.winnpixie.btgui.utilities;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.function.Function;
 
-public class OSHelper {
-    private static Platform platform;
+public class SystemHelper {
+    public static final File CURRENT_DIRECTORY = new File(System.getProperty("user.dir"));
+    public static final File HOME_DIRECTORY = new File(System.getProperty("user.home"));
+    public static final Platform PLATFORM;
 
-    public static Platform getPlatform() {
-        if (platform == null) {
-            platform = Platform.UNIX;
-
-            if (System.getProperty("os.name").contains("Windows")) {
-                platform = Platform.WINDOWS;
-            }
-        }
-
-        return platform;
+    static {
+        PLATFORM = System.getProperty("os.name").contains("Windows")
+                ? Platform.WINDOWS : Platform.UNIX;
     }
 
-    public static void showDirectory(File file) {
+    public static void openFolder(File file) {
         if (!file.isDirectory()) return; // TODO: Is this... ever an issue?
 
         try {
@@ -30,8 +28,20 @@ public class OSHelper {
             e.printStackTrace();
         }
 
+        openLink(file.toURI());
+    }
+
+    public static void openLink(URL url) {
         try {
-            Desktop.getDesktop().browse(file.toURI());
+            openLink(url.toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void openLink(URI uri) {
+        try {
+            Desktop.getDesktop().browse(uri);
         } catch (IOException e) {
             e.printStackTrace();
         }

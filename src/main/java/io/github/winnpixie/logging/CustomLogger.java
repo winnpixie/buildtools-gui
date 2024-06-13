@@ -32,4 +32,8 @@ public class CustomLogger {
         outputDevices.forEach(device -> device.error(String.format("%s: %s", exception.getClass().getSimpleName(),
                 exception.getMessage())));
     }
+
+    public void print(String message) {
+        outputDevices.forEach(device -> device.print(message));
+    }
 }

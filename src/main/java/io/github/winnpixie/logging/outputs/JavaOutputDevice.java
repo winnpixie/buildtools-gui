@@ -25,4 +25,9 @@ public class JavaOutputDevice implements OutputDevice {
     public void error(String error) {
         logger.severe(error);
     }
+
+    @Override
+    public void print(String message) {
+        info(message);
+    }
 }

@@ -1,9 +1,17 @@
 package io.github.winnpixie.logging;
 
 public interface OutputDevice {
-    void info(String message);
+    default void info(String message) {
+        print(String.format("[INFO] %s", message));
+    }
 
-    void warn(String warning);
+    default void warn(String warning) {
+        print(String.format("[WARN] %s", warning));
+    }
 
-    void error(String error);
+    default void error(String error) {
+        print(String.format("[ERR] %s", error));
+    }
+
+    void print(String message);
 }

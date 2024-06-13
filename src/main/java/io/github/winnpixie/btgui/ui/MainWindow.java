@@ -1,10 +1,9 @@
-package io.github.winnpixie.btgui.ui.windows.main;
+package io.github.winnpixie.btgui.ui;
 
-import io.github.winnpixie.btgui.BuildToolsGUI;
-import io.github.winnpixie.btgui.ui.windows.main.panels.AboutPanel;
-import io.github.winnpixie.btgui.ui.windows.main.panels.BuildToolsOptionsPanel;
-import io.github.winnpixie.btgui.ui.windows.main.panels.ProcessingPanel;
-import io.github.winnpixie.btgui.ui.windows.main.panels.ProgramOptionsPanel;
+import io.github.winnpixie.btgui.ui.panels.AboutPanel;
+import io.github.winnpixie.btgui.ui.panels.OptionsPanel;
+import io.github.winnpixie.btgui.ui.panels.ProcessingPanel;
+import io.github.winnpixie.btgui.utilities.ProcessHelper;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,29 +16,23 @@ import java.io.InputStream;
 public class MainWindow extends JFrame {
     public static Image WINDOW_ICON;
 
-    private final int windowWidth;
-    private final int windowHeight;
-
     public MainWindow(int width, int height) throws HeadlessException {
         super("BuildTools GUI");
 
-        this.windowWidth = width;
-        this.windowHeight = height;
-
-        this.configureWindow();
+        this.configureWindow(width, height);
         this.populateWithComponents();
         this.packAndDisplay();
     }
 
-    public void configureWindow() {
+    public void configureWindow(int width, int height) {
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
         super.setResizable(false);
-        super.setPreferredSize(new Dimension(windowWidth, windowHeight));
+        super.setPreferredSize(new Dimension(width, height));
 
         super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (BuildToolsGUI.getActiveBuilds() > 0) {
+                if (ProcessHelper.getProcessCount() > 0) {
                     MainWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
                     JOptionPane.showMessageDialog(MainWindow.this, "Please wait for ALL BuildTools tasks to finish before exiting the program.");
                 } else {
@@ -49,23 +42,20 @@ public class MainWindow extends JFrame {
         });
 
         try (InputStream is = this.getClass().getResourceAsStream("/assets/icon-small.png")) {
-            if (is != null) {
-                super.setIconImage(WINDOW_ICON = ImageIO.read(is));
-            }
+            if (is != null) super.setIconImage(WINDOW_ICON = ImageIO.read(is));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void populateWithComponents() {
-        JTabbedPane tabsPane = new JTabbedPane();
+        JTabbedPane panelTabs = new JTabbedPane();
 
-        tabsPane.add("Program Options", new ProgramOptionsPanel());
-        tabsPane.add("BuildTools Options", new BuildToolsOptionsPanel());
-        tabsPane.add("Output", new ProcessingPanel());
-        tabsPane.add("About", new AboutPanel());
+        panelTabs.add("Options", new OptionsPanel());
+        panelTabs.add("Processing", new ProcessingPanel());
+        panelTabs.add("About", new AboutPanel());
 
-        super.add(tabsPane);
+        super.add(panelTabs);
     }
 
     public void packAndDisplay() {

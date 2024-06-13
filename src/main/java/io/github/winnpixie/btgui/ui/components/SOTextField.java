@@ -49,10 +49,10 @@ public class SOTextField extends JTextField {
         super.paintComponent(g);
 
         Graphics2D g2d = (Graphics2D) g.create();
-        if (getText().isEmpty()) {
-            g2d.setColor(super.getDisabledTextColor());
-            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g2d.drawString(placeholder, super.getInsets().left, super.getInsets().top + g.getFontMetrics().getMaxAscent());
-        }
+        if (!getText().isEmpty()) return;
+
+        g2d.setColor(super.getDisabledTextColor());
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.drawString(placeholder, super.getInsets().left, super.getInsets().top + g.getFontMetrics().getMaxAscent());
     }
 }

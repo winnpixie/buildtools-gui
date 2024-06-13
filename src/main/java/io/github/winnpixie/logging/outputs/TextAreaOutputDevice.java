@@ -12,17 +12,9 @@ public class TextAreaOutputDevice implements OutputDevice {
     }
 
     @Override
-    public void info(String message) {
-        textArea.append(String.format("[INFO] %s%n", message));
-    }
+    public void print(String message) {
+        textArea.append(String.format("%s%n", message));
 
-    @Override
-    public void warn(String warning) {
-        textArea.append(String.format("[WARNING] %s%n", warning));
-    }
-
-    @Override
-    public void error(String error) {
-        textArea.append(String.format("[ERROR] %s%n", error));
+        textArea.setCaretPosition(textArea.getDocument().getLength());
     }
 }

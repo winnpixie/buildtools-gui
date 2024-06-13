@@ -1,7 +1,6 @@
 package io.github.winnpixie.btgui.config;
 
-import io.github.winnpixie.btgui.BuildToolsGUI;
-import io.github.winnpixie.btgui.utilities.OSHelper;
+import io.github.winnpixie.btgui.utilities.SystemHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ public class BuildToolsOptions {
     public static boolean compileCraftBukkit = false;
     public static boolean compileNothing = false;
 
-    public static String outputDirectory = BuildToolsGUI.CURRENT_DIRECTORY.getAbsolutePath(); // output-dir/o <DIR>
+    public static String outputDirectory = ""; // output-dir/o <DIR>
     public static String revision = "latest"; // rev <VERSION>
     public static String pullRequests = ""; // pull-request/pr <REPO:ID>
 
@@ -72,7 +71,7 @@ public class BuildToolsOptions {
 
         if (!outputDirectory.isEmpty()) {
             arguments.add("--output-dir");
-            arguments.add(OSHelper.getPlatform().getPathFormatter().apply(outputDirectory));
+            arguments.add(SystemHelper.PLATFORM.getPathFormatter().apply(outputDirectory));
         }
 
         return arguments;

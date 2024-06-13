@@ -26,7 +26,7 @@ public class IOHelper {
 
         try {
             conn = (HttpURLConnection) (new URL(url)).openConnection();
-            conn.setRequestProperty("User-Agent", "Java/BT-GUI ( https://github.com/winnpixie/bt-gui/ )");
+            conn.setRequestProperty("User-Agent", "winnpixie/buildtools-gui ( https://github.com/winnpixie/buildtools-gui/ )");
 
             try (InputStream inputStream = conn.getInputStream()) {
                 return getBytes(inputStream);
@@ -36,17 +36,16 @@ public class IOHelper {
         }
     }
 
-    public static void delete(File file) throws IOException {
-        if (!file.isDirectory()) {
-            Files.deleteIfExists(file.toPath());
-            return;
+    public static void deleteRecursively(File file) throws IOException {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children != null) {
+                for (File child : children) {
+                    deleteRecursively(child);
+                }
+            }
         }
 
-        File[] children = file.listFiles();
-        if (children == null) return;
-
-        for (File child : children) {
-            delete(child);
-        }
+        Files.deleteIfExists(file.toPath());
     }
 }

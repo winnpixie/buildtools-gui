@@ -1,7 +1,7 @@
 package io.github.winnpixie.btgui.config;
 
 import io.github.winnpixie.btgui.utilities.Extensions;
-import io.github.winnpixie.btgui.utilities.OSHelper;
+import io.github.winnpixie.btgui.utilities.SystemHelper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class ProgramOptions {
     public static List<String> buildJavaCommand() {
         List<String> command = new ArrayList<>();
 
-        String javaPath = OSHelper.getPlatform().getPathFormatter()
+        String javaPath = SystemHelper.PLATFORM.getPathFormatter()
                 .apply(String.format("%s%cbin%<cjava", ProgramOptions.javaHome, File.separatorChar));
         command.add(javaPath);
 

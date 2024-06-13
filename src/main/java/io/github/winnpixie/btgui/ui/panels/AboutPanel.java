@@ -1,4 +1,4 @@
-package io.github.winnpixie.btgui.ui.windows.main.panels;
+package io.github.winnpixie.btgui.ui.panels;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.utilities.SwingHelper;
@@ -17,8 +17,7 @@ public class AboutPanel extends JPanel {
         super.add(SwingHelper.createLabel(String.format("BuildTools GUI (v%s)<hr />", BuildToolsGUI.VERSION),
                 5, 0, 930, 25));
         super.add(SwingHelper.createLabel("An unofficial frontend for SpigotMC's BuildTools software", 5, 25, 930, 25));
-        super.add(SwingHelper.createHyperlinkedLabel("Developed by Hannah " +
-                        "(<a href=\"https://github.com/winnpixie/\">github.com/winnpixie/</a>)",
+        super.add(SwingHelper.createHyperlinkedLabel("Developed by <a href=\"https://github.com/winnpixie/\">winnpixie</a>.",
                 10, 50, 480, 25));
         super.add(SwingHelper.createHyperlinkedLabel("Source code available at " +
                         "<a href=\"https://github.com/winnpixie/bt-gui/\">github.com/winnpixie/bt-gui/</a>",

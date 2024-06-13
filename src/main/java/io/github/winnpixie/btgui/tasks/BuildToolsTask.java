@@ -1,10 +1,9 @@
 package io.github.winnpixie.btgui.tasks;
 
-import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.config.BuildToolsOptions;
 import io.github.winnpixie.btgui.config.ProgramOptions;
 import io.github.winnpixie.btgui.utilities.IOHelper;
-import io.github.winnpixie.btgui.utilities.OSHelper;
+import io.github.winnpixie.btgui.utilities.SystemHelper;
 import io.github.winnpixie.logging.CustomLogger;
 
 import java.io.BufferedReader;
@@ -14,99 +13,68 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class BuildToolsExecutor {
+public class BuildToolsTask implements Supplier<Boolean> {
     private final List<String> javaCommand;
-    private final List<String> buildToolsArguments;
-    private final CustomLogger logger = new CustomLogger();
+    private final List<String> programArguments;
 
-    private boolean active;
+    private CustomLogger logger;
 
-    public BuildToolsExecutor(List<String> javaCommand, List<String> buildToolsArguments) {
+    public BuildToolsTask(List<String> javaCommand, List<String> programArguments) {
         this.javaCommand = javaCommand;
-        this.buildToolsArguments = buildToolsArguments;
+        this.programArguments = programArguments;
     }
 
-    public List<String> getJavaCommand() {
-        return javaCommand;
+    public void setLogger(CustomLogger logger) {
+        this.logger = logger;
     }
 
-    public List<String> getBuildToolsArguments() {
-        return buildToolsArguments;
-    }
+    @Override
+    public Boolean get() {
+        logger.info(String.format("JAVA COMMAND = %s", String.join(" ", javaCommand)));
+        logger.info(String.format("PROGRAM ARGUMENTS = %s", String.join(" ", programArguments)));
 
-    public CustomLogger getLogger() {
-        return logger;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public boolean run() {
-        active = true;
-
-        File buildToolsFile = new File(BuildToolsGUI.CURRENT_DIRECTORY, "BuildTools.jar");
+        File buildToolsFile = new File(SystemHelper.CURRENT_DIRECTORY, "BuildTools.jar");
         if (ProgramOptions.downloadBuildTools) {
             logger.info("Downloading BuildTools.jar from https://hub.spigotmc.org/");
 
             byte[] buildToolsData = downloadBuildTools();
-            if (buildToolsData.length == 0) {
-                logger.error("Could not download BuildTools, stopping!");
-
-                active = false;
-                return false;
-            }
-
-            if (!saveBuildTools(buildToolsFile, buildToolsData)) {
-                logger.error("Could not save BuildTools.jar to storage device, stopping!");
-
-                active = false;
-                return false;
-            }
+            if (buildToolsData.length == 0) return false;
+            if (!saveBuildTools(buildToolsFile, buildToolsData)) return false;
         }
 
         logger.info("Creating run directory");
-        File runDir = new File(BuildToolsGUI.CURRENT_DIRECTORY, "run");
+        File runDir = new File(SystemHelper.CURRENT_DIRECTORY, "run");
         if (ProgramOptions.isolateRuns) {
-            runDir = new File(BuildToolsGUI.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
+            runDir = new File(SystemHelper.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
         }
 
-        if (!runDir.exists() && !runDir.mkdir()) {
-            logger.error("Could not create run directory, stopping!");
-
-            active = false;
-            return false;
-        }
+        if (!runDir.exists() && !runDir.mkdir()) return false;
 
         logger.info(String.format("Created run directory @ %s", runDir.getPath()));
 
         logger.info("Copying BuildTools.jar to run directory");
-        if (!copyBuildToolsToRunDirectory(buildToolsFile, runDir)) {
-            logger.error("Could not copy BuildTools.jar to run directory!");
-
-            active = false;
-            return false;
-        }
+        if (!copyBuildToolsToRunDirectory(buildToolsFile, runDir)) return false;
 
         logger.info("Java Command:");
         logger.info(String.join(" ", javaCommand));
 
         logger.info("BuildTools Arguments:");
-        logger.info(String.join(" ", buildToolsArguments));
+        logger.info(String.join(" ", programArguments));
 
         logger.info("Full Command:");
-        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runDir, buildToolsArguments);
+        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runDir, programArguments);
         logger.info(String.join(" ", buildToolsProcessBuilder.command()));
 
-        logger.info("Running BuildTools, please wait...");
+        logger.info("Running BuildTools...");
         try {
             long startTime = System.nanoTime();
             Process buildToolsProcess = buildToolsProcessBuilder.start();
 
             while (buildToolsProcess.isAlive()) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
-                    br.lines().forEach(logger::info);
+                    br.lines().forEach(logger::print);
                 }
             }
 
@@ -115,7 +83,7 @@ public class BuildToolsExecutor {
 
             if (ProgramOptions.openOutputAfterFinish) {
                 logger.info(String.format("\nOpening %s in system file explorer...", BuildToolsOptions.outputDirectory));
-                OSHelper.showDirectory(new File(BuildToolsOptions.outputDirectory));
+                SystemHelper.openFolder(new File(BuildToolsOptions.outputDirectory));
             }
 
             return true;
@@ -133,8 +101,6 @@ public class BuildToolsExecutor {
                     logger.warn("Could not delete work directory.");
                 }
             }
-
-            active = false;
         }
     }
 
@@ -186,7 +152,7 @@ public class BuildToolsExecutor {
 
     private boolean deleteRunDirectory(File directory) {
         try {
-            IOHelper.delete(directory);
+            IOHelper.deleteRecursively(directory);
             return true;
         } catch (IOException e) {
             logger.error(e);

@@ -6,7 +6,7 @@
 
     <groupId>io.github.winnpixie</groupId>
     <artifactId>buildtools-gui</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
 
     <properties>
         <javac.version>1.8</javac.version>
@@ -25,7 +25,6 @@
     </dependencies>
 
     <build>
-        <finalName>BuildTools-GUI-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -50,6 +49,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
                             <filters>
                                 <filter>
                                     <artifact>com.formdev:flatlaf</artifact>

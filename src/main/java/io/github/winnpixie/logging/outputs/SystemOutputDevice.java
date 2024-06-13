@@ -17,4 +17,9 @@ public class SystemOutputDevice implements OutputDevice {
     public void error(String error) {
         System.err.printf("[ERROR] %s%n", error);
     }
+
+    @Override
+    public void print(String message) {
+        info(message);
+    }
 }
