@@ -9,8 +9,8 @@ import java.net.URL;
 import java.util.function.Function;
 
 public class SystemHelper {
-    public static final File CURRENT_DIRECTORY = new File(System.getProperty("user.dir"));
-    public static final File HOME_DIRECTORY = new File(System.getProperty("user.home"));
+    public static final String CURRENT_DIRECTORY = System.getProperty("user.dir");
+    public static final String HOME_DIRECTORY = System.getProperty("user.home");
     public static final Platform PLATFORM;
 
     static {

@@ -42,15 +42,15 @@ public class SOTextField extends JTextField {
 
     public void setPlaceholder(String placeholder) {
         this.placeholder = placeholder;
+        repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        Graphics2D g2d = (Graphics2D) g.create();
         if (!getText().isEmpty()) return;
 
+        Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(super.getDisabledTextColor());
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g2d.drawString(placeholder, super.getInsets().left, super.getInsets().top + g.getFontMetrics().getMaxAscent());

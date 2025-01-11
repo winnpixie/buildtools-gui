@@ -1,6 +1,5 @@
 package io.github.winnpixie.btgui;
 
-import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import io.github.winnpixie.btgui.ui.MainWindow;
 

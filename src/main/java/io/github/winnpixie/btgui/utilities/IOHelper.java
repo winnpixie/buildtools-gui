@@ -1,12 +1,13 @@
 package io.github.winnpixie.btgui.utilities;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class IOHelper {
     public static byte[] getBytes(InputStream streamIn) throws IOException {
@@ -36,16 +37,13 @@ public class IOHelper {
         }
     }
 
-    public static void deleteRecursively(File file) throws IOException {
-        if (file.isDirectory()) {
-            File[] children = file.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    deleteRecursively(child);
-                }
+    public static void deleteRecursively(Path path) throws IOException {
+        if (Files.isDirectory(path)) {
+            try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
+                for (Path child : directory) deleteRecursively(child);
             }
         }
 
-        Files.deleteIfExists(file.toPath());
+        Files.deleteIfExists(path);
     }
 }

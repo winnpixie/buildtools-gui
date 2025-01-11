@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.function.Supplier;
@@ -35,27 +37,20 @@ public class BuildToolsTask implements Supplier<Boolean> {
         logger.info(String.format("JAVA COMMAND = %s", String.join(" ", javaCommand)));
         logger.info(String.format("PROGRAM ARGUMENTS = %s", String.join(" ", programArguments)));
 
-        File buildToolsFile = new File(SystemHelper.CURRENT_DIRECTORY, "BuildTools.jar");
+        Path buildToolsPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, "BuildTools.jar");
         if (ProgramOptions.downloadBuildTools) {
             logger.info("Downloading BuildTools.jar from https://hub.spigotmc.org/");
-
             byte[] buildToolsData = downloadBuildTools();
             if (buildToolsData.length == 0) return false;
-            if (!saveBuildTools(buildToolsFile, buildToolsData)) return false;
+            if (!saveBuildTools(buildToolsPath, buildToolsData)) return false;
         }
 
         logger.info("Creating run directory");
-        File runDir = new File(SystemHelper.CURRENT_DIRECTORY, "run");
-        if (ProgramOptions.isolateRuns) {
-            runDir = new File(SystemHelper.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
-        }
-
-        if (!runDir.exists() && !runDir.mkdir()) return false;
-
-        logger.info(String.format("Created run directory @ %s", runDir.getPath()));
+        Path runPath = createRunDirectory();
+        if (runPath == null) return false;
 
         logger.info("Copying BuildTools.jar to run directory");
-        if (!copyBuildToolsToRunDirectory(buildToolsFile, runDir)) return false;
+        if (!copyBuildToolsToRunDirectory(buildToolsPath, runPath)) return false;
 
         logger.info("Java Command:");
         logger.info(String.join(" ", javaCommand));
@@ -64,44 +59,12 @@ public class BuildToolsTask implements Supplier<Boolean> {
         logger.info(String.join(" ", programArguments));
 
         logger.info("Full Command:");
-        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runDir, programArguments);
+        logger.info("Full Command:");
+        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runPath.toFile(), programArguments);
         logger.info(String.join(" ", buildToolsProcessBuilder.command()));
 
         logger.info("Running BuildTools...");
-        try {
-            long startTime = System.nanoTime();
-            Process buildToolsProcess = buildToolsProcessBuilder.start();
-
-            while (buildToolsProcess.isAlive()) {
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
-                    br.lines().forEach(logger::print);
-                }
-            }
-
-            logger.info(String.format("\nBuildTools took roughly %.3fs to complete.",
-                    (System.nanoTime() - startTime) / 1_000_000_000.0));
-
-            if (ProgramOptions.openOutputAfterFinish) {
-                logger.info(String.format("\nOpening %s in system file explorer...", BuildToolsOptions.outputDirectory));
-                SystemHelper.openFolder(new File(BuildToolsOptions.outputDirectory));
-            }
-
-            return true;
-        } catch (IOException e) {
-            logger.error(e);
-            return false;
-        } finally {
-            // (optionally) Clean up after ourselves :)
-            if (ProgramOptions.deleteWorkDirOnFinish) {
-                logger.info("Deleting work directory...");
-
-                if (deleteRunDirectory(runDir)) {
-                    logger.info("Deleted work directory.");
-                } else {
-                    logger.warn("Could not delete work directory.");
-                }
-            }
-        }
+        return runBuildTools(buildToolsProcessBuilder, runPath);
     }
 
     private byte[] downloadBuildTools() {
@@ -113,9 +76,9 @@ public class BuildToolsTask implements Supplier<Boolean> {
         }
     }
 
-    private boolean saveBuildTools(File buildToolsFile, byte[] binData) {
+    private boolean saveBuildTools(Path buildToolsPath, byte[] data) {
         try {
-            Files.write(buildToolsFile.toPath(), binData);
+            Files.write(buildToolsPath, data);
             return true;
         } catch (IOException e) {
             logger.error(e);
@@ -123,10 +86,29 @@ public class BuildToolsTask implements Supplier<Boolean> {
         }
     }
 
-    private boolean copyBuildToolsToRunDirectory(File originalBuildTools, File runDirectory) {
+    private Path createRunDirectory() {
+        Path runPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, "run");
+        if (ProgramOptions.isolateRuns) {
+            runPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
+        }
+
+        if (Files.notExists(runPath)) {
+            try {
+                Files.createDirectory(runPath);
+            } catch (IOException e) {
+                logger.error(e);
+                return null;
+            }
+        }
+
+        logger.info(String.format("Created run directory @ %s", runPath));
+        return runPath;
+    }
+
+    private boolean copyBuildToolsToRunDirectory(Path originalBuildTools, Path runPath) {
         try {
-            File buildToolsCopy = new File(runDirectory, "BuildTools.jar");
-            Files.copy(originalBuildTools.toPath(), buildToolsCopy.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Path buildToolsCopy = runPath.resolve("BuildTools.jar");
+            Files.copy(originalBuildTools, buildToolsCopy, StandardCopyOption.REPLACE_EXISTING);
             return true;
         } catch (IOException e) {
             logger.error(e);
@@ -134,10 +116,10 @@ public class BuildToolsTask implements Supplier<Boolean> {
         }
     }
 
-    private ProcessBuilder buildProcess(List<String> javaCommand, File workingDirectory, List<String> buildToolsArguments) {
+    private ProcessBuilder buildProcess(List<String> javaCommand, File workingDir, List<String> buildToolsArguments) {
         ProcessBuilder builder = new ProcessBuilder()
                 .command(javaCommand)
-                .directory(workingDirectory)
+                .directory(workingDir)
                 .redirectErrorStream(true);
         builder.command().addAll(buildToolsArguments);
 
@@ -150,13 +132,46 @@ public class BuildToolsTask implements Supplier<Boolean> {
         return builder;
     }
 
-    private boolean deleteRunDirectory(File directory) {
+    private boolean runBuildTools(ProcessBuilder buildToolsProcessBuilder, Path runPath) {
         try {
-            IOHelper.deleteRecursively(directory);
+            long startTime = System.nanoTime();
+            Process buildToolsProcess = buildToolsProcessBuilder.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
+                reader.lines().forEach(logger::print);
+            }
+
+            buildToolsProcess.destroy();
+
+            logger.info(String.format("\nBuildTools took approximately %.3fs to complete.",
+                    (System.nanoTime() - startTime) / 1_000_000_000.0));
+
+            if (ProgramOptions.openOutputAfterFinish) {
+                logger.info(String.format("\nOpening %s in system file explorer", BuildToolsOptions.outputDirectory));
+                SystemHelper.openFolder(new File(BuildToolsOptions.outputDirectory));
+            }
+
             return true;
         } catch (IOException e) {
             logger.error(e);
             return false;
+        } finally {
+            cleanUp(runPath);
+        }
+    }
+
+    // (optionally) Clean up after ourselves :)
+    private void cleanUp(Path runPath) {
+        if (ProgramOptions.deleteWorkDirOnFinish) {
+            logger.info("Deleting work directory...");
+
+            try {
+                IOHelper.deleteRecursively(runPath);
+                logger.info("Deleted work directory.");
+            } catch (IOException e) {
+                logger.error(e);
+                logger.warn("Could not delete work directory.");
+            }
         }
     }
 }
