@@ -20,7 +20,7 @@ public class AboutPanel extends JPanel {
         super.add(SwingHelper.createHyperlinkedLabel("Developed by <a href=\"https://github.com/winnpixie/\">winnpixie</a>.",
                 10, 50, 480, 25));
         super.add(SwingHelper.createHyperlinkedLabel("Source code available at " +
-                        "<a href=\"https://github.com/winnpixie/bt-gui/\">github.com/winnpixie/bt-gui/</a>",
+                        "<a href=\"https://github.com/winnpixie/buildtools-gui/\">github.com/winnpixie/buildtools-gui/</a>",
                 10, 75, 480, 25));
 
         super.add(SwingHelper.createLabel("Credits/Attributions<hr />", 5, 125, 930, 25));

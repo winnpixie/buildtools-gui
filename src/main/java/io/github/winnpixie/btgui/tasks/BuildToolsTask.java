@@ -52,13 +52,6 @@ public class BuildToolsTask implements Supplier<Boolean> {
         logger.info("Copying BuildTools.jar to run directory");
         if (!copyBuildToolsToRunDirectory(buildToolsPath, runPath)) return false;
 
-        logger.info("Java Command:");
-        logger.info(String.join(" ", javaCommand));
-
-        logger.info("BuildTools Arguments:");
-        logger.info(String.join(" ", programArguments));
-
-        logger.info("Full Command:");
         logger.info("Full Command:");
         ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runPath.toFile(), programArguments);
         logger.info(String.join(" ", buildToolsProcessBuilder.command()));
@@ -134,7 +127,7 @@ public class BuildToolsTask implements Supplier<Boolean> {
 
     private boolean runBuildTools(ProcessBuilder buildToolsProcessBuilder, Path runPath) {
         try {
-            long startTime = System.nanoTime();
+            long startTime = System.currentTimeMillis();
             Process buildToolsProcess = buildToolsProcessBuilder.start();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
@@ -144,7 +137,7 @@ public class BuildToolsTask implements Supplier<Boolean> {
             buildToolsProcess.destroy();
 
             logger.info(String.format("\nBuildTools took approximately %.3fs to complete.",
-                    (System.nanoTime() - startTime) / 1_000_000_000.0));
+                    (System.currentTimeMillis() - startTime) / 1_000.0));
 
             if (ProgramOptions.openOutputAfterFinish) {
                 logger.info(String.format("\nOpening %s in system file explorer", BuildToolsOptions.outputDirectory));
@@ -160,8 +153,9 @@ public class BuildToolsTask implements Supplier<Boolean> {
         }
     }
 
-    // (optionally) Clean up after ourselves :)
+    // (Optionally) Clean up after ourselves. :)
     private void cleanUp(Path runPath) {
+        // FIXME: Something (PortableGit?) is causing this to fail on Windows.
         if (ProgramOptions.deleteWorkDirOnFinish) {
             logger.info("Deleting work directory...");
 

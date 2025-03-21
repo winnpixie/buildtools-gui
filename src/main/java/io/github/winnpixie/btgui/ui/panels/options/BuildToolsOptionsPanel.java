@@ -13,7 +13,7 @@ import java.io.File;
 public class BuildToolsOptionsPanel extends JPanel {
     // Server
     private final JCheckBox skipGitPullOpt = new JCheckBox("Don't Pull from Git", false);
-    private final JCheckBox compileIfChangedOpt = new JCheckBox("Only (Re-)Compile If Changed", false);
+    private final JCheckBox compileIfChangedOpt = new JCheckBox("Only Compile If Changed", false);
 
     // Server - Compilation Targets
     private final JCheckBox compileSpigotOpt = new JCheckBox("Spigot", true);
@@ -24,17 +24,17 @@ public class BuildToolsOptionsPanel extends JPanel {
     private final JTextField revisionFld = new SOTextField("latest", "Revision (ie. latest)");
     private final JTextField pullRequestsFld = new SOTextField("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
     private final JTextField outputDirFld = new SOTextField(BuildToolsOptions.outputDirectory, "Output Directory");
-    private final JButton selectOutputDirBtn = new JButton("Select ...");
+    private final JButton selectOutputDirBtn = new JButton("Browse");
 
     // Plugins
-    private final JCheckBox genSourcesOpt = new JCheckBox("Generate Sources JAR(s)", false);
-    private final JCheckBox genDocsOpt = new JCheckBox("Generate JavaDocs JAR(s)", false);
-    private final JCheckBox remappedOpt = new JCheckBox("MVN Install Remapped JAR(s)", false);
+    private final JCheckBox genSourcesOpt = new JCheckBox("Generate Sources", false);
+    private final JCheckBox genDocsOpt = new JCheckBox("Generate JavaDocs", false);
+    private final JCheckBox remappedOpt = new JCheckBox("Install Remapped to Maven Local", false);
 
     // Advanced
     private final JCheckBox skipHttpsCertCheckOpt = new JCheckBox("Skip HTTPS Certificate Check", false);
     private final JCheckBox skipJavaVersionCheckOpt = new JCheckBox("Skip Java Version Check", false);
-    private final JCheckBox devModeOpt = new JCheckBox("Run BuildTools in Dev Mode", false);
+    private final JCheckBox devModeOpt = new JCheckBox("Developer Mode", false);
     private final JCheckBox experimentalBuildOpt = new JCheckBox("Generate Experimental Build", false);
 
     public BuildToolsOptionsPanel() {
@@ -57,7 +57,7 @@ public class BuildToolsOptionsPanel extends JPanel {
 
     private void addServerOptions() {
         // Don't Pull from Git
-        skipGitPullOpt.setBounds(10, 25, 200, 25);
+        skipGitPullOpt.setBounds(10, 25, 480, 25);
         SwingHelper.setTooltip(skipGitPullOpt, "BuildTools CLI Arg: --dont-update");
         skipGitPullOpt.addActionListener(e -> {
             BuildToolsOptions.skipGitPull = skipGitPullOpt.isSelected();
@@ -74,12 +74,12 @@ public class BuildToolsOptionsPanel extends JPanel {
         super.add(skipGitPullOpt);
 
         // Compile If Changed
-        compileIfChangedOpt.setBounds(10, 50, 200, 25);
+        compileIfChangedOpt.setBounds(10, 50, 480, 25);
         SwingHelper.setTooltip(compileIfChangedOpt, "BuildTools CLI Arg: --compile-if-changed");
         super.add(compileIfChangedOpt);
 
         // Compilation Targets
-        super.add(SwingHelper.createLabel("Compilation Target(s)", 10, 100, 200, 25));
+        super.add(SwingHelper.createLabel("Compilation Target(s)", 10, 100, 480, 25));
 
         // Spigot
         compileSpigotOpt.setBounds(15, 125, 75, 25);
@@ -104,7 +104,7 @@ public class BuildToolsOptionsPanel extends JPanel {
         });
         super.add(compileNothingOpt);
 
-        super.add(SwingHelper.createLabel("Revision/Version", 10, 150, 100, 25));
+        super.add(SwingHelper.createLabel("Revision/Version", 10, 150, 480, 25));
         // Revision
         revisionFld.setBounds(10, 175, 300, 25);
         SwingHelper.setTooltip(revisionFld, "BuildTools CLI Arg: --rev &lt;revision&gt;");
@@ -116,7 +116,7 @@ public class BuildToolsOptionsPanel extends JPanel {
         });
         super.add(revisionFld);
 
-        super.add(SwingHelper.createLabel("Pull Request(s)", 315, 150, 100, 25));
+        super.add(SwingHelper.createLabel("Pull Request(s)", 315, 150, 480, 25));
         // Pull Requests
         pullRequestsFld.setBounds(315, 175, 300, 25);
         SwingHelper.setTooltip(pullRequestsFld, "BuildTools CLI Arg: --pull-request &lt;repo:id&gt;");
@@ -128,7 +128,7 @@ public class BuildToolsOptionsPanel extends JPanel {
         });
         super.add(pullRequestsFld);
 
-        super.add(SwingHelper.createLabel("Output Directory", 10, 200, 100, 25));
+        super.add(SwingHelper.createLabel("Output Directory", 10, 200, 480, 25));
         // Output Directory
         outputDirFld.setBounds(10, 225, 500, 25);
         SwingHelper.setTooltip(outputDirFld, "BuildTools CLI Arg: --output-dir &lt;directory&gt;");
@@ -152,19 +152,19 @@ public class BuildToolsOptionsPanel extends JPanel {
 
     private void addPluginOptions() {
         // Gen Sources
-        genSourcesOpt.setBounds(10, 300, 200, 25);
+        genSourcesOpt.setBounds(10, 300, 480, 25);
         SwingHelper.setTooltip(genSourcesOpt, "BuildTools CLI Arg: --generate-source");
         genSourcesOpt.addActionListener(e -> BuildToolsOptions.generateSourcesJar = genSourcesOpt.isSelected());
         super.add(genSourcesOpt);
 
         // Gen Javadocs
-        genDocsOpt.setBounds(10, 325, 200, 25);
+        genDocsOpt.setBounds(10, 325, 480, 25);
         SwingHelper.setTooltip(genDocsOpt, "BuildTools CLI Arg: --generate-docs");
         genDocsOpt.addActionListener(e -> BuildToolsOptions.generateJavadocsJar = genDocsOpt.isSelected());
         super.add(genDocsOpt);
 
         // MVN Install Remapped
-        remappedOpt.setBounds(10, 350, 200, 25);
+        remappedOpt.setBounds(10, 350, 480, 25);
         SwingHelper.setTooltip(remappedOpt, "BuildTools CLI Arg: --remapped");
         remappedOpt.addActionListener(e -> BuildToolsOptions.remapped = remappedOpt.isSelected());
         super.add(remappedOpt);
@@ -172,19 +172,19 @@ public class BuildToolsOptionsPanel extends JPanel {
 
     private void addAdvancedOptions() {
         // Bypass HTTPS Cert
-        skipHttpsCertCheckOpt.setBounds(10, 425, 200, 25);
+        skipHttpsCertCheckOpt.setBounds(10, 425, 480, 25);
         SwingHelper.setTooltip(skipHttpsCertCheckOpt, "BuildTools CLI Arg: --disable-certificate-check");
         skipHttpsCertCheckOpt.addActionListener(e -> BuildToolsOptions.skipCertCheck = skipHttpsCertCheckOpt.isSelected());
         super.add(skipHttpsCertCheckOpt);
 
         // Bypass Java Version
-        skipJavaVersionCheckOpt.setBounds(10, 450, 200, 25);
+        skipJavaVersionCheckOpt.setBounds(10, 450, 480, 25);
         SwingHelper.setTooltip(skipJavaVersionCheckOpt, "BuildTools CLI Arg: --disable-java-check");
         skipJavaVersionCheckOpt.addActionListener(e -> BuildToolsOptions.skipJavaVersionCheck = skipJavaVersionCheckOpt.isSelected());
         super.add(skipJavaVersionCheckOpt);
 
         // Dev Mode
-        devModeOpt.setBounds(10, 475, 200, 25);
+        devModeOpt.setBounds(10, 475, 480, 25);
         SwingHelper.setTooltip(devModeOpt, "BuildTools CLI Arg: --dev");
         devModeOpt.addActionListener(e -> {
             BuildToolsOptions.developerMode = devModeOpt.isSelected();
@@ -201,7 +201,7 @@ public class BuildToolsOptionsPanel extends JPanel {
         super.add(devModeOpt);
 
         // Experimental Mode
-        experimentalBuildOpt.setBounds(10, 500, 200, 25);
+        experimentalBuildOpt.setBounds(10, 500, 480, 25);
         SwingHelper.setTooltip(experimentalBuildOpt, "BuildTools CLI Arg: --experimental");
         experimentalBuildOpt.addActionListener(e -> {
             BuildToolsOptions.experimentalMode = experimentalBuildOpt.isSelected();

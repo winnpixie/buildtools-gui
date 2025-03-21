@@ -12,12 +12,12 @@ public class ProcessHelper {
         return PROCESS_COUNT.get();
     }
 
-    public static int addProcess() {
-        return PROCESS_COUNT.incrementAndGet();
+    public static void addProcess() {
+        PROCESS_COUNT.incrementAndGet();
     }
 
-    public static int removeProcess() {
-        return PROCESS_COUNT.decrementAndGet();
+    public static void removeProcess() {
+        PROCESS_COUNT.decrementAndGet();
     }
 
     public static BuildToolsTask createProcess(List<String> javaCommand, List<String> programArgs) {

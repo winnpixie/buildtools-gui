@@ -21,7 +21,7 @@ public class ProgramOptionsPanel extends JPanel {
     private final JCheckBox deleteRunDirOnFinishOpt = new JCheckBox("Delete Run Directory on Finish", false);
 
     private final JTextField javaHomeFld = new SOTextField(ProgramOptions.javaHome, "JAVA_HOME");
-    private final JButton selectJavaHomeBtn = new JButton("Select ...");
+    private final JButton selectJavaHomeBtn = new JButton("Browse");
 
     private final JTextField jvmArgsFld = new SOTextField(ProgramOptions.jvmArguments, "JVM Arguments");
 
@@ -37,31 +37,31 @@ public class ProgramOptionsPanel extends JPanel {
 
     private void populateWithComponents() {
         // Download BuildTools
-        downloadBuildToolsOpt.setBounds(5, 0, 200, 25);
+        downloadBuildToolsOpt.setBounds(5, 0, 480, 25);
         SwingHelper.setTooltip(downloadBuildToolsOpt, "Download's BuildTools.jar from SpigotMC Jenkins.");
         downloadBuildToolsOpt.addActionListener(e -> ProgramOptions.downloadBuildTools = downloadBuildToolsOpt.isSelected());
         super.add(downloadBuildToolsOpt);
 
         // Isolate Runs
-        isolateRunsOpt.setBounds(5, 25, 200, 25);
+        isolateRunsOpt.setBounds(5, 25, 480, 25);
         SwingHelper.setTooltip(isolateRunsOpt, "Creates a new directory with a random name when BuildTools is ran," +
                 "\nuseful for building different Minecraft versions.");
         isolateRunsOpt.addActionListener(e -> ProgramOptions.isolateRuns = isolateRunsOpt.isSelected());
         super.add(isolateRunsOpt);
 
         // Open Output Directory on Finish
-        openOutputDirOnFinishOpt.setBounds(5, 50, 200, 25);
+        openOutputDirOnFinishOpt.setBounds(5, 50, 480, 25);
         SwingHelper.setTooltip(openOutputDirOnFinishOpt, "Opens the BuildTools output directory when it is completed.");
         openOutputDirOnFinishOpt.addActionListener(e -> ProgramOptions.openOutputAfterFinish = openOutputDirOnFinishOpt.isSelected());
         super.add(openOutputDirOnFinishOpt);
 
         // Delete Run Directory on Finish
-        deleteRunDirOnFinishOpt.setBounds(5, 75, 200, 25);
+        deleteRunDirOnFinishOpt.setBounds(5, 75, 480, 25);
         SwingHelper.setTooltip(deleteRunDirOnFinishOpt, "Deletes the BuildTools run directory when it is completed.");
         deleteRunDirOnFinishOpt.addActionListener(e -> ProgramOptions.deleteWorkDirOnFinish = deleteRunDirOnFinishOpt.isSelected());
         super.add(deleteRunDirOnFinishOpt);
 
-        super.add(SwingHelper.createLabel("JAVA_HOME Path", 5, 125, 200, 25));
+        super.add(SwingHelper.createLabel("JAVA_HOME Path", 5, 125, 480, 25));
         // JAVA_HOME
         javaHomeFld.setBounds(5, 150, 505, 25);
         SwingHelper.setTooltip(javaHomeFld, "The directory of the JDK to run BuildTools with.");
@@ -72,7 +72,7 @@ public class ProgramOptionsPanel extends JPanel {
         selectJavaHomeBtn.addActionListener(e -> setAndDisplayRuntime());
         super.add(selectJavaHomeBtn);
 
-        super.add(SwingHelper.createLabel("JVM Arguments", 5, 200, 200, 25));
+        super.add(SwingHelper.createLabel("JVM Arguments", 5, 200, 480, 25));
         // JVM Arguments
         jvmArgsFld.setBounds(5, 225, 610, 25);
         SwingHelper.setTooltip(jvmArgsFld, "Examples: -Xms512M, -Xmx1024M, etc...\n" +
@@ -86,7 +86,7 @@ public class ProgramOptionsPanel extends JPanel {
         });
         super.add(jvmArgsFld);
 
-        super.add(SwingHelper.createLabel("MAVEN_OPTS Arguments", 5, 275, 200, 25));
+        super.add(SwingHelper.createLabel("MAVEN_OPTS Arguments", 5, 275, 480, 25));
         // MAVEN_OPTS
         mavenOptsFld.setBounds(5, 300, 610, 25);
         SwingHelper.setTooltip(mavenOptsFld, "Similar to JVM Arguments, but for Maven.\n" +
