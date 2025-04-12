@@ -1,7 +1,7 @@
 package io.github.winnpixie.btgui.tasks;
 
-import io.github.winnpixie.btgui.config.BuildToolsOptions;
-import io.github.winnpixie.btgui.config.ProgramOptions;
+import io.github.winnpixie.btgui.options.BuildToolsOptions;
+import io.github.winnpixie.btgui.options.ProgramOptions;
 import io.github.winnpixie.btgui.utilities.IOHelper;
 import io.github.winnpixie.btgui.utilities.SystemHelper;
 import io.github.winnpixie.logging.CustomLogger;
@@ -18,14 +18,15 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class BuildToolsTask implements Supplier<Boolean> {
-    private final List<String> javaCommand;
-    private final List<String> programArguments;
+    private final ProgramOptions programOptions;
+    private final BuildToolsOptions buildToolsOptions;
 
     private CustomLogger logger;
+    private File outputDir;
 
-    public BuildToolsTask(List<String> javaCommand, List<String> programArguments) {
-        this.javaCommand = javaCommand;
-        this.programArguments = programArguments;
+    public BuildToolsTask(ProgramOptions programOptions, BuildToolsOptions buildToolsOptions) {
+        this.programOptions = programOptions;
+        this.buildToolsOptions = buildToolsOptions;
     }
 
     public void setLogger(CustomLogger logger) {
@@ -34,30 +35,36 @@ public class BuildToolsTask implements Supplier<Boolean> {
 
     @Override
     public Boolean get() {
+        List<String> javaCommand = programOptions.buildCommand();
+        List<String> buildToolsArguments = buildToolsOptions.buildArguments();
         logger.info(String.format("JAVA COMMAND = %s", String.join(" ", javaCommand)));
-        logger.info(String.format("PROGRAM ARGUMENTS = %s", String.join(" ", programArguments)));
+        logger.info(String.format("PROGRAM ARGUMENTS = %s", String.join(" ", buildToolsArguments)));
+
+        logger.info("Creating working directory");
+        Path workingPath = createWorkingDirectory();
+        if (workingPath == null) return false;
+
+        File workDir = workingPath.toFile();
+        outputDir = workDir;
+        if (!buildToolsOptions.outputDirectory.isEmpty()) outputDir = new File(buildToolsOptions.outputDirectory);
 
         Path buildToolsPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, "BuildTools.jar");
-        if (ProgramOptions.downloadBuildTools) {
+        if (programOptions.downloadBuildTools) {
             logger.info("Downloading BuildTools.jar from https://hub.spigotmc.org/");
             byte[] buildToolsData = downloadBuildTools();
             if (buildToolsData.length == 0) return false;
             if (!saveBuildTools(buildToolsPath, buildToolsData)) return false;
         }
 
-        logger.info("Creating run directory");
-        Path runPath = createRunDirectory();
-        if (runPath == null) return false;
-
         logger.info("Copying BuildTools.jar to run directory");
-        if (!copyBuildToolsToRunDirectory(buildToolsPath, runPath)) return false;
+        if (!copyBuildToolsToRunDirectory(buildToolsPath, workingPath)) return false;
 
         logger.info("Full Command:");
-        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, runPath.toFile(), programArguments);
+        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, workDir, buildToolsArguments);
         logger.info(String.join(" ", buildToolsProcessBuilder.command()));
 
         logger.info("Running BuildTools...");
-        return runBuildTools(buildToolsProcessBuilder, runPath);
+        return runBuildTools(buildToolsProcessBuilder, workingPath);
     }
 
     private byte[] downloadBuildTools() {
@@ -65,6 +72,7 @@ public class BuildToolsTask implements Supplier<Boolean> {
             return IOHelper.getBytes("https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar");
         } catch (IOException e) {
             logger.error(e);
+
             return new byte[0];
         }
     }
@@ -72,16 +80,18 @@ public class BuildToolsTask implements Supplier<Boolean> {
     private boolean saveBuildTools(Path buildToolsPath, byte[] data) {
         try {
             Files.write(buildToolsPath, data);
+
             return true;
         } catch (IOException e) {
             logger.error(e);
+
             return false;
         }
     }
 
-    private Path createRunDirectory() {
+    private Path createWorkingDirectory() {
         Path runPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, "run");
-        if (ProgramOptions.isolateRuns) {
+        if (programOptions.isolateRuns) {
             runPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, String.format("run-%d", System.currentTimeMillis()));
         }
 
@@ -90,6 +100,7 @@ public class BuildToolsTask implements Supplier<Boolean> {
                 Files.createDirectory(runPath);
             } catch (IOException e) {
                 logger.error(e);
+
                 return null;
             }
         }
@@ -102,9 +113,11 @@ public class BuildToolsTask implements Supplier<Boolean> {
         try {
             Path buildToolsCopy = runPath.resolve("BuildTools.jar");
             Files.copy(originalBuildTools, buildToolsCopy, StandardCopyOption.REPLACE_EXISTING);
+
             return true;
         } catch (IOException e) {
             logger.error(e);
+
             return false;
         }
     }
@@ -116,10 +129,10 @@ public class BuildToolsTask implements Supplier<Boolean> {
                 .redirectErrorStream(true);
         builder.command().addAll(buildToolsArguments);
 
-        builder.environment().put("JAVA_HOME", ProgramOptions.javaHome);
+        builder.environment().put("JAVA_HOME", programOptions.javaHome);
 
-        if (!ProgramOptions.mavenOptions.isEmpty()) {
-            builder.environment().put("MAVEN_OPTS", ProgramOptions.mavenOptions);
+        if (!programOptions.mavenOptions.isEmpty()) {
+            builder.environment().put("MAVEN_OPTS", programOptions.mavenOptions);
         }
 
         return builder;
@@ -139,14 +152,15 @@ public class BuildToolsTask implements Supplier<Boolean> {
             logger.info(String.format("\nBuildTools took approximately %.3fs to complete.",
                     (System.currentTimeMillis() - startTime) / 1_000.0));
 
-            if (ProgramOptions.openOutputAfterFinish) {
-                logger.info(String.format("\nOpening %s in system file explorer", BuildToolsOptions.outputDirectory));
-                SystemHelper.openFolder(new File(BuildToolsOptions.outputDirectory));
+            if (programOptions.openOutputAfterFinish) {
+                logger.info(String.format("\nOpening %s in system file explorer", outputDir.getPath()));
+                SystemHelper.openFolder(outputDir);
             }
 
             return true;
         } catch (IOException e) {
             logger.error(e);
+
             return false;
         } finally {
             cleanUp(runPath);
@@ -155,8 +169,8 @@ public class BuildToolsTask implements Supplier<Boolean> {
 
     // (Optionally) Clean up after ourselves. :)
     private void cleanUp(Path runPath) {
-        // FIXME: Something (PortableGit?) is causing this to fail on Windows.
-        if (ProgramOptions.deleteWorkDirOnFinish) {
+        // FIXME: Something (possibly PortableGit?) causes this to fail.
+        if (programOptions.deleteWorkDirOnFinish) {
             logger.info("Deleting work directory...");
 
             try {

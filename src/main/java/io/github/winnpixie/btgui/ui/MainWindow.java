@@ -32,7 +32,7 @@ public class MainWindow extends JFrame {
         super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (ProcessHelper.getProcessCount() > 0) {
+                if (ProcessHelper.PROCESS_COUNTER.get() > 0) {
                     MainWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
                     JOptionPane.showMessageDialog(MainWindow.this, "Please wait for ALL BuildTools tasks to finish before exiting the program.");
                 } else {

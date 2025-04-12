@@ -1,7 +1,7 @@
 package io.github.winnpixie.btgui.ui.panels;
 
-import io.github.winnpixie.btgui.config.BuildToolsOptions;
-import io.github.winnpixie.btgui.config.ProgramOptions;
+import io.github.winnpixie.btgui.options.BuildToolsOptions;
+import io.github.winnpixie.btgui.options.ProgramOptions;
 import io.github.winnpixie.btgui.ui.panels.processing.ProcessInfoPanel;
 import io.github.winnpixie.btgui.ui.panels.processing.ProcessPanel;
 import io.github.winnpixie.btgui.utilities.ProcessHelper;
@@ -24,8 +24,8 @@ public class ProcessingPanel extends JPanel {
     private void populateWithComponents() {
         previewBtn.setBounds(5, 5, 465, 25);
         previewBtn.addActionListener(e -> {
-            String javaCommand = String.join(" ", ProgramOptions.buildJavaCommand());
-            String buildToolsArgs = String.join(" ", BuildToolsOptions.buildArguments());
+            String javaCommand = String.join(" ", ProgramOptions.TEMPLATE.buildCommand());
+            String buildToolsArgs = String.join(" ", BuildToolsOptions.TEMPLATE.buildArguments());
             previewArea.setText("Java Command:\n");
             previewArea.append(javaCommand);
 
@@ -39,10 +39,10 @@ public class ProcessingPanel extends JPanel {
 
         runBtn.setBounds(475, 5, 465, 25);
         runBtn.addActionListener(e -> {
-            processTabs.add(String.format("Run #%d", ProcessHelper.getProcessCount() + 1),
+            processTabs.add(String.format("Run #%d", ++ProcessHelper.PID_TICKER),
                     new ProcessPanel(processTabs, ProcessHelper.createProcess(
-                            ProgramOptions.buildJavaCommand(),
-                            BuildToolsOptions.buildArguments())));
+                            new ProgramOptions(ProgramOptions.TEMPLATE),
+                            new BuildToolsOptions(BuildToolsOptions.TEMPLATE))));
             processTabs.setSelectedIndex(processTabs.getTabCount() - 1);
         });
         super.add(runBtn);

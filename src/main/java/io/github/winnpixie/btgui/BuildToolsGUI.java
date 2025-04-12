@@ -1,6 +1,7 @@
 package io.github.winnpixie.btgui;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
 import io.github.winnpixie.btgui.ui.MainWindow;
 
 import javax.swing.*;
@@ -10,8 +11,9 @@ public class BuildToolsGUI {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            FlatDarkLaf.setPreferredFontFamily("Arial");
+            FlatLaf.setPreferredFontFamily("Arial");
             FlatDarkLaf.setup();
+
             new MainWindow(960, 640);
         });
     }

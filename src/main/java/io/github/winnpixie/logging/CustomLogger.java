@@ -1,7 +1,5 @@
 package io.github.winnpixie.logging;
 
-import io.github.winnpixie.btgui.utilities.Extensions;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +7,9 @@ public class CustomLogger {
     private final List<OutputDevice> outputDevices = new ArrayList<>();
 
     public CustomLogger(OutputDevice... outputDevices) {
-        Extensions.addAll(this.outputDevices, outputDevices);
+        for (OutputDevice device : outputDevices) {
+            addOutput(device);
+        }
     }
 
     public boolean addOutput(OutputDevice outputDevice) {
@@ -28,9 +28,9 @@ public class CustomLogger {
         outputDevices.forEach(device -> device.error(error));
     }
 
-    public void error(Throwable exception) {
-        outputDevices.forEach(device -> device.error(String.format("%s: %s", exception.getClass().getSimpleName(),
-                exception.getMessage())));
+    public void error(Throwable throwable) {
+        outputDevices.forEach(device -> device.error(String.format("%s: %s", throwable.getClass().getSimpleName(),
+                throwable.getMessage())));
     }
 
     public void print(String message) {

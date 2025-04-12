@@ -1,6 +1,6 @@
 package io.github.winnpixie.btgui.ui.panels.options;
 
-import io.github.winnpixie.btgui.config.ProgramOptions;
+import io.github.winnpixie.btgui.options.ProgramOptions;
 import io.github.winnpixie.btgui.ui.components.SOTextField;
 import io.github.winnpixie.btgui.utilities.SwingHelper;
 import io.github.winnpixie.btgui.utilities.SystemHelper;
@@ -20,12 +20,12 @@ public class ProgramOptionsPanel extends JPanel {
     private final JCheckBox openOutputDirOnFinishOpt = new JCheckBox("Open Output Directory on Finish", true);
     private final JCheckBox deleteRunDirOnFinishOpt = new JCheckBox("Delete Run Directory on Finish", false);
 
-    private final JTextField javaHomeFld = new SOTextField(ProgramOptions.javaHome, "JAVA_HOME");
+    private final JTextField javaHomeFld = new SOTextField(ProgramOptions.TEMPLATE.javaHome, "JAVA_HOME");
     private final JButton selectJavaHomeBtn = new JButton("Browse");
 
-    private final JTextField jvmArgsFld = new SOTextField(ProgramOptions.jvmArguments, "JVM Arguments");
+    private final JTextField jvmArgsFld = new SOTextField(ProgramOptions.TEMPLATE.jvmArguments, "JVM Arguments");
 
-    private final JTextField mavenOptsFld = new SOTextField(ProgramOptions.mavenOptions, "MAVEN_OPTS");
+    private final JTextField mavenOptsFld = new SOTextField(ProgramOptions.TEMPLATE.mavenOptions, "MAVEN_OPTS");
 
 
     public ProgramOptionsPanel() {
@@ -39,26 +39,26 @@ public class ProgramOptionsPanel extends JPanel {
         // Download BuildTools
         downloadBuildToolsOpt.setBounds(5, 0, 480, 25);
         SwingHelper.setTooltip(downloadBuildToolsOpt, "Download's BuildTools.jar from SpigotMC Jenkins.");
-        downloadBuildToolsOpt.addActionListener(e -> ProgramOptions.downloadBuildTools = downloadBuildToolsOpt.isSelected());
+        downloadBuildToolsOpt.addActionListener(e -> ProgramOptions.TEMPLATE.downloadBuildTools = downloadBuildToolsOpt.isSelected());
         super.add(downloadBuildToolsOpt);
 
         // Isolate Runs
         isolateRunsOpt.setBounds(5, 25, 480, 25);
         SwingHelper.setTooltip(isolateRunsOpt, "Creates a new directory with a random name when BuildTools is ran," +
                 "\nuseful for building different Minecraft versions.");
-        isolateRunsOpt.addActionListener(e -> ProgramOptions.isolateRuns = isolateRunsOpt.isSelected());
+        isolateRunsOpt.addActionListener(e -> ProgramOptions.TEMPLATE.isolateRuns = isolateRunsOpt.isSelected());
         super.add(isolateRunsOpt);
 
         // Open Output Directory on Finish
         openOutputDirOnFinishOpt.setBounds(5, 50, 480, 25);
         SwingHelper.setTooltip(openOutputDirOnFinishOpt, "Opens the BuildTools output directory when it is completed.");
-        openOutputDirOnFinishOpt.addActionListener(e -> ProgramOptions.openOutputAfterFinish = openOutputDirOnFinishOpt.isSelected());
+        openOutputDirOnFinishOpt.addActionListener(e -> ProgramOptions.TEMPLATE.openOutputAfterFinish = openOutputDirOnFinishOpt.isSelected());
         super.add(openOutputDirOnFinishOpt);
 
         // Delete Run Directory on Finish
         deleteRunDirOnFinishOpt.setBounds(5, 75, 480, 25);
         SwingHelper.setTooltip(deleteRunDirOnFinishOpt, "Deletes the BuildTools run directory when it is completed.");
-        deleteRunDirOnFinishOpt.addActionListener(e -> ProgramOptions.deleteWorkDirOnFinish = deleteRunDirOnFinishOpt.isSelected());
+        deleteRunDirOnFinishOpt.addActionListener(e -> ProgramOptions.TEMPLATE.deleteWorkDirOnFinish = deleteRunDirOnFinishOpt.isSelected());
         super.add(deleteRunDirOnFinishOpt);
 
         super.add(SwingHelper.createLabel("JAVA_HOME Path", 5, 125, 480, 25));
@@ -81,7 +81,7 @@ public class ProgramOptionsPanel extends JPanel {
         jvmArgsFld.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                ProgramOptions.jvmArguments = jvmArgsFld.getText();
+                ProgramOptions.TEMPLATE.jvmArguments = jvmArgsFld.getText();
             }
         });
         super.add(jvmArgsFld);
@@ -96,34 +96,36 @@ public class ProgramOptionsPanel extends JPanel {
         mavenOptsFld.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                ProgramOptions.mavenOptions = mavenOptsFld.getText();
+                ProgramOptions.TEMPLATE.mavenOptions = mavenOptsFld.getText();
             }
         });
         super.add(mavenOptsFld);
     }
 
     private void setAndDisplayRuntime() {
-        JFileChooser chooser = new JFileChooser(ProgramOptions.javaHome);
+        JFileChooser chooser = new JFileChooser(ProgramOptions.TEMPLATE.javaHome);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         if (chooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
         File dir = chooser.getSelectedFile();
         if (dir == null) return;
 
-        ProgramOptions.javaHome = dir.getAbsolutePath();
-        javaHomeFld.setText(ProgramOptions.javaHome);
+        ProgramOptions.TEMPLATE.javaHome = dir.getAbsolutePath();
+        javaHomeFld.setText(ProgramOptions.TEMPLATE.javaHome);
 
         try {
             ProcessBuilder pb = new ProcessBuilder(SystemHelper.PLATFORM.getPathFormatter()
-                    .apply(String.format("%s%cbin%<cjava", ProgramOptions.javaHome, File.separatorChar)),
+                    .apply(String.format("%s%cbin%<cjava", ProgramOptions.TEMPLATE.javaHome, File.separatorChar)),
                     "-version");
-            pb.environment().put("JAVA_HOME", ProgramOptions.javaHome);
+            pb.environment().put("JAVA_HOME", ProgramOptions.TEMPLATE.javaHome);
             Process proc = pb.start();
 
             try (BufferedReader br = new BufferedReader(new InputStreamReader(proc.getErrorStream()))) {
                 JOptionPane.showMessageDialog(this, br.lines().collect(Collectors.joining("\n")));
             }
         } catch (IOException ex) {
+            ex.printStackTrace();
+
             JOptionPane.showMessageDialog(this, String.format("Could not retrieve Java Runtime information!%n%n%s",
                     ex.getMessage()), "Uh Oh!", JOptionPane.ERROR_MESSAGE);
         }

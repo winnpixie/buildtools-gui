@@ -22,7 +22,7 @@ public class ProcessPanel extends JPanel {
 
         this.tabManager = tabManager;
         this.taskThread = new Thread(() -> {
-            ProcessHelper.addProcess();
+            ProcessHelper.PROCESS_COUNTER.incrementAndGet();
 
             task.setLogger(this.logger);
             if (task.get()) {
@@ -31,8 +31,8 @@ public class ProcessPanel extends JPanel {
                 logger.error("\n\nAn error occurred during the build process!");
             }
 
-            ProcessHelper.removeProcess();
-        });
+            ProcessHelper.PROCESS_COUNTER.decrementAndGet();
+        }, "buildtools_task");
 
         super.setLayout(null);
         this.configurePanel();

@@ -10,7 +10,7 @@ public interface OutputDevice {
     }
 
     default void error(String error) {
-        print(String.format("[ERR] %s", error));
+        print(String.format("[ERROR] %s", error));
     }
 
     void print(String message);

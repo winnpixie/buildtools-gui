@@ -18,14 +18,28 @@ public class SystemHelper {
                 ? Platform.WINDOWS : Platform.UNIX;
     }
 
+    public static String getDefaultJavaHome() {
+        String home = System.getenv("JAVA_HOME");
+        if (home == null || home.isEmpty()) return System.getProperty("java.home");
+
+        return home;
+    }
+
+    public static String getDefaultMavenOptions() {
+        String mavenOpts = System.getenv("MAVEN_OPTS");
+        if (mavenOpts == null || mavenOpts.isEmpty()) return "-Xms1024M -Xmx1024M";
+
+        return mavenOpts;
+    }
+
     public static void openFolder(File file) {
         if (!file.isDirectory()) return; // TODO: Is this... ever an issue?
 
         try {
             Desktop.getDesktop().open(file);
             return;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
 
         openLink(file.toURI());
@@ -34,16 +48,16 @@ public class SystemHelper {
     public static void openLink(URL url) {
         try {
             openLink(url.toURI());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+        } catch (URISyntaxException ex) {
+            ex.printStackTrace();
         }
     }
 
     public static void openLink(URI uri) {
         try {
             Desktop.getDesktop().browse(uri);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 

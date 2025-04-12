@@ -42,6 +42,7 @@ public class SOTextField extends JTextField {
 
     public void setPlaceholder(String placeholder) {
         this.placeholder = placeholder;
+
         repaint();
     }
 
