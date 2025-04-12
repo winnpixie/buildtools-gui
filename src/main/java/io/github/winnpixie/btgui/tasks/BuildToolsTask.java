@@ -22,7 +22,6 @@ public class BuildToolsTask implements Supplier<Boolean> {
     private final BuildToolsOptions buildToolsOptions;
 
     private CustomLogger logger;
-    private File outputDir;
 
     public BuildToolsTask(ProgramOptions programOptions, BuildToolsOptions buildToolsOptions) {
         this.programOptions = programOptions;
@@ -41,12 +40,8 @@ public class BuildToolsTask implements Supplier<Boolean> {
         logger.info(String.format("PROGRAM ARGUMENTS = %s", String.join(" ", buildToolsArguments)));
 
         logger.info("Creating working directory");
-        Path workingPath = createWorkingDirectory();
-        if (workingPath == null) return false;
-
-        File workDir = workingPath.toFile();
-        outputDir = workDir;
-        if (!buildToolsOptions.outputDirectory.isEmpty()) outputDir = new File(buildToolsOptions.outputDirectory);
+        Path workingDir = createWorkingDirectory();
+        if (workingDir == null) return false;
 
         Path buildToolsPath = Paths.get(SystemHelper.CURRENT_DIRECTORY, "BuildTools.jar");
         if (programOptions.downloadBuildTools) {
@@ -57,14 +52,14 @@ public class BuildToolsTask implements Supplier<Boolean> {
         }
 
         logger.info("Copying BuildTools.jar to run directory");
-        if (!copyBuildToolsToRunDirectory(buildToolsPath, workingPath)) return false;
+        if (!copyBuildToolsToRunDirectory(buildToolsPath, workingDir)) return false;
 
         logger.info("Full Command:");
-        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, workDir, buildToolsArguments);
+        ProcessBuilder buildToolsProcessBuilder = buildProcess(javaCommand, workingDir.toFile(), buildToolsArguments);
         logger.info(String.join(" ", buildToolsProcessBuilder.command()));
 
         logger.info("Running BuildTools...");
-        return runBuildTools(buildToolsProcessBuilder, workingPath);
+        return runBuildTools(buildToolsProcessBuilder, workingDir);
     }
 
     private byte[] downloadBuildTools() {
@@ -138,9 +133,10 @@ public class BuildToolsTask implements Supplier<Boolean> {
         return builder;
     }
 
-    private boolean runBuildTools(ProcessBuilder buildToolsProcessBuilder, Path runPath) {
+    private boolean runBuildTools(ProcessBuilder buildToolsProcessBuilder, Path workingDir) {
+        long startTime = System.currentTimeMillis();
+
         try {
-            long startTime = System.currentTimeMillis();
             Process buildToolsProcess = buildToolsProcessBuilder.start();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(buildToolsProcess.getInputStream()))) {
@@ -148,22 +144,23 @@ public class BuildToolsTask implements Supplier<Boolean> {
             }
 
             buildToolsProcess.destroy();
-
-            logger.info(String.format("\nBuildTools took approximately %.3fs to complete.",
-                    (System.currentTimeMillis() - startTime) / 1_000.0));
-
-            if (programOptions.openOutputAfterFinish) {
-                logger.info(String.format("\nOpening %s in system file explorer", outputDir.getPath()));
-                SystemHelper.openFolder(outputDir);
-            }
-
             return true;
         } catch (IOException e) {
             logger.error(e);
 
             return false;
         } finally {
-            cleanUp(runPath);
+            logger.info(String.format("\nBuildTools took approximately %.3fs to complete.",
+                    (System.currentTimeMillis() - startTime) / 1_000.0));
+
+            if (programOptions.openOutputAfterFinish) {
+                File outputDir = buildToolsOptions.outputDirectory.isEmpty() ? workingDir.toFile()
+                        : new File(buildToolsOptions.outputDirectory);
+                logger.info(String.format("\nOpening %s in system file explorer", outputDir.getPath()));
+                SystemHelper.openFolder(outputDir);
+            }
+
+            cleanUp(workingDir);
         }
     }
 
