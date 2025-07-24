@@ -14,17 +14,17 @@ public class AboutPanel extends JPanel {
     }
 
     private void populateWithComponents() {
-        super.add(SwingHelper.createLabel(String.format("BuildTools GUI (v%s)<hr />", BuildToolsGUI.VERSION),
+        super.add(SwingHelper.createLabel(String.format("BuildTools GUI (v%s)<hr />", BuildToolsGUI.getVersion()),
                 5, 0, 930, 25));
-        super.add(SwingHelper.createLabel("An unofficial frontend for SpigotMC's BuildTools software", 5, 25, 930, 25));
+        super.add(SwingHelper.createLabel("A third-party front-end for SpigotMC's BuildTools software.", 5, 25, 930, 25));
         super.add(SwingHelper.createHyperlinkedLabel("Developed by <a href=\"https://github.com/winnpixie/\">winnpixie</a>.",
                 10, 50, 480, 25));
         super.add(SwingHelper.createHyperlinkedLabel("Source code available at " +
-                        "<a href=\"https://github.com/winnpixie/buildtools-gui/\">github.com/winnpixie/buildtools-gui/</a>",
+                        "<a href=\"https://github.com/winnpixie/buildtools-gui/\">github.com/winnpixie/buildtools-gui/</a>.",
                 10, 75, 480, 25));
 
         super.add(SwingHelper.createLabel("Credits/Attributions<hr />", 5, 125, 930, 25));
-        super.add(SwingHelper.createHyperlinkedLabel("<a href=\"https://github.com/md-5/\">md_5</a> - Develops the " +
+        super.add(SwingHelper.createHyperlinkedLabel("<a href=\"https://spigotmc.org/\">SpigotMC</a> - Provides the " +
                         "<a href=\"https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse\">BuildTools</a>" +
                         " software that this program utilizes.",
                 10, 150, 480, 25));

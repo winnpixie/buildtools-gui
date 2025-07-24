@@ -4,7 +4,11 @@ import javax.swing.*;
 import javax.swing.text.Document;
 import java.awt.*;
 
-// https://stackoverflow.com/a/16229082
+/**
+ * A JTextField with drawable "placeholder" text.
+ *
+ * @author <a href="https://stackoverflow.com/a/16229082">Stack Overflow</a>
+ */
 public class SOTextField extends JTextField {
     private String placeholder;
 
@@ -49,6 +53,7 @@ public class SOTextField extends JTextField {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (placeholder == null) return;
         if (!getText().isEmpty()) return;
 
         Graphics2D g2d = (Graphics2D) g.create();

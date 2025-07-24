@@ -4,12 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class IOHelper {
+public final class IOHelper {
+    private IOHelper() {
+    }
+
     public static byte[] getBytes(InputStream streamIn) throws IOException {
         ByteArrayOutputStream streamOut = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
@@ -26,7 +29,7 @@ public class IOHelper {
         HttpURLConnection conn = null;
 
         try {
-            conn = (HttpURLConnection) (new URL(url)).openConnection();
+            conn = (HttpURLConnection) URI.create(url).toURL().openConnection();
             conn.setRequestProperty("User-Agent", "winnpixie/buildtools-gui ( https://github.com/winnpixie/buildtools-gui/ )");
 
             try (InputStream inputStream = conn.getInputStream()) {

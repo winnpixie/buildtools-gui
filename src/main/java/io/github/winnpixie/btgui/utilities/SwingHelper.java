@@ -4,12 +4,15 @@ import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-public class SwingHelper {
-    private static final HyperlinkListener linkListener = e -> {
-        if (e.getEventType() != HyperlinkEvent.EventType.ACTIVATED) return;
+public final class SwingHelper {
+    private static final HyperlinkListener LINK_LISTENER = event -> {
+        if (event.getEventType() != HyperlinkEvent.EventType.ACTIVATED) return;
 
-        SystemHelper.openLink(e.getURL());
+        SystemHelper.openLink(event.getURL());
     };
+
+    private SwingHelper() {
+    }
 
     public static JLabel createLabel(String text, int x, int y, int width, int height) {
         JLabel label = createLabel(text);
@@ -19,7 +22,7 @@ public class SwingHelper {
     }
 
     public static JLabel createLabel(String text) {
-        return new JLabel(String.format("<html>%s</html>", text));
+        return new JLabel(asHTML(text));
     }
 
     public static JEditorPane createHyperlinkedLabel(String text, int x, int y, int width, int height) {
@@ -30,16 +33,19 @@ public class SwingHelper {
     }
 
     public static JEditorPane createHyperlinkedLabel(String text) {
-        JEditorPane editorPane = new JEditorPane("text/html", String.format("<html>%s</html>", text));
+        JEditorPane editorPane = new JEditorPane("text/html", asHTML(text));
         editorPane.setEditable(false);
-        editorPane.addHyperlinkListener(linkListener);
+        editorPane.addHyperlinkListener(LINK_LISTENER);
 
         return editorPane;
     }
 
     public static void setTooltip(JComponent component, String text) {
-        text = text.replace("\n", "<br />");
+        component.setToolTipText(asHTML(text));
+    }
 
-        component.setToolTipText(String.format("<html>%s</html>", text));
+    private static String asHTML(String text) {
+        return String.format("<html>%s</html>", text
+                .replace("\n", "<br />"));
     }
 }

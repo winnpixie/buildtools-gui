@@ -1,6 +1,6 @@
-package io.github.winnpixie.btgui.ui.panels.options;
+package io.github.winnpixie.btgui.ui.panels.configuration;
 
-import io.github.winnpixie.btgui.options.BuildToolsOptions;
+import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.ui.components.SOTextField;
 import io.github.winnpixie.btgui.utilities.SwingHelper;
 import io.github.winnpixie.btgui.utilities.SystemHelper;
@@ -10,9 +10,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
-public class BuildToolsOptionsPanel extends JPanel {
+public class BuildToolsConfigurationPanel extends JPanel {
     // Server
-    private final JCheckBox skipGitPullOpt = new JCheckBox("Don't Pull from Git", false);
+    private final JCheckBox dontUpdateOpt = new JCheckBox("Don't Pull from Git", false);
     private final JCheckBox compileIfChangedOpt = new JCheckBox("Only Compile If Changed", false);
 
     // Server - Compilation Targets
@@ -23,9 +23,9 @@ public class BuildToolsOptionsPanel extends JPanel {
     // Server - Version
     private final JTextField revisionFld = new SOTextField("latest", "Revision (ie. latest)");
     private final JTextField pullRequestsFld = new SOTextField("Pull Request(s) (ie. SPIGOT:120,SPIGOT:111)");
-    private final JTextField outputDirFld = new SOTextField(BuildToolsOptions.TEMPLATE.outputDirectory, "Output Directory");
+    private final JTextField outputDirFld = new SOTextField("", "Output Directory, click \"Browse\" to set...");
     private final JButton selectOutputDirBtn = new JButton("Browse");
-    private final JTextField finalNameFld = new SOTextField(BuildToolsOptions.TEMPLATE.finalName, "Final Name (ie. server.jar)");
+    private final JTextField finalNameFld = new SOTextField("", "Final Name (ie. server.jar)");
 
     // Plugins
     private final JCheckBox genSourcesOpt = new JCheckBox("Generate Sources", false);
@@ -36,9 +36,9 @@ public class BuildToolsOptionsPanel extends JPanel {
     private final JCheckBox skipHttpsCertCheckOpt = new JCheckBox("Skip HTTPS Certificate Check", false);
     private final JCheckBox skipJavaVersionCheckOpt = new JCheckBox("Skip Java Version Check", false);
     private final JCheckBox devModeOpt = new JCheckBox("Developer Mode", false);
-    private final JCheckBox experimentalBuildOpt = new JCheckBox("Generate Experimental Build", false);
+    private final JCheckBox experimentalOpt = new JCheckBox("Generate Experimental Build", false);
 
-    public BuildToolsOptionsPanel() {
+    public BuildToolsConfigurationPanel() {
         super();
 
         super.setLayout(null);
@@ -58,25 +58,19 @@ public class BuildToolsOptionsPanel extends JPanel {
 
     private void addServerOptions() {
         // Don't Pull from Git
-        skipGitPullOpt.setBounds(10, 25, 480, 25);
-        SwingHelper.setTooltip(skipGitPullOpt, "BuildTools CLI: --dont-update");
-        skipGitPullOpt.addActionListener(e -> {
-            BuildToolsOptions.TEMPLATE.skipGitPull = skipGitPullOpt.isSelected();
+        dontUpdateOpt.setBounds(10, 25, 480, 25);
+        SwingHelper.setTooltip(dontUpdateOpt, "BuildTools CLI: --dont-update");
+        dontUpdateOpt.addActionListener(e -> {
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.dontUpdate(dontUpdateOpt.isSelected());
 
-            if (BuildToolsOptions.TEMPLATE.skipGitPull) {
-                revisionFld.setEditable(false);
-                SwingHelper.setTooltip(revisionFld, "Revisions can not be used with Experimental Mode, Developer Mode," +
-                        "\nor when \"Don't Pull from Git\" is enabled.");
-            } else if (!BuildToolsOptions.TEMPLATE.developerMode && !BuildToolsOptions.TEMPLATE.experimentalMode) {
-                revisionFld.setEditable(true);
-                SwingHelper.setTooltip(revisionFld, "BuildTools CLI: --rev &lt;revision&gt;");
-            }
+            toggleRevisionField();
         });
-        super.add(skipGitPullOpt);
+        super.add(dontUpdateOpt);
 
         // Compile If Changed
         compileIfChangedOpt.setBounds(10, 50, 480, 25);
         SwingHelper.setTooltip(compileIfChangedOpt, "BuildTools CLI: --compile-if-changed");
+        compileIfChangedOpt.addActionListener(e -> BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.compileIfChanged(compileIfChangedOpt.isSelected()));
         super.add(compileIfChangedOpt);
 
         // Compilation Targets
@@ -85,13 +79,13 @@ public class BuildToolsOptionsPanel extends JPanel {
         // Spigot
         compileSpigotOpt.setBounds(15, 125, 75, 25);
         SwingHelper.setTooltip(compileSpigotOpt, "BuildTools CLI: --compile SPIGOT");
-        compileSpigotOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.compileSpigot = compileSpigotOpt.isSelected());
+        compileSpigotOpt.addActionListener(e -> updateCompileTargets());
         super.add(compileSpigotOpt);
 
         // CraftBukkit
         compileCraftBukkitOpt.setBounds(90, 125, 100, 25);
         SwingHelper.setTooltip(compileCraftBukkitOpt, "BuildTools CLI: --compile CRAFTBUKKIT");
-        compileCraftBukkitOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.compileCraftBukkit = compileCraftBukkitOpt.isSelected());
+        compileCraftBukkitOpt.addActionListener(e -> updateCompileTargets());
         super.add(compileCraftBukkitOpt);
 
         // None
@@ -101,18 +95,18 @@ public class BuildToolsOptionsPanel extends JPanel {
             compileSpigotOpt.setEnabled(!compileNothingOpt.isSelected());
             compileCraftBukkitOpt.setEnabled(!compileNothingOpt.isSelected());
 
-            BuildToolsOptions.TEMPLATE.compileNothing = compileNothingOpt.isSelected();
+            updateCompileTargets();
         });
         super.add(compileNothingOpt);
 
         super.add(SwingHelper.createLabel("Revision/Version", 10, 150, 480, 25));
         // Revision
         revisionFld.setBounds(10, 175, 300, 25);
-        SwingHelper.setTooltip(revisionFld, "BuildTools CLI: --rev &lt;revision&gt;");
+        SwingHelper.setTooltip(revisionFld, "BuildTools CLI: --rev REVISION");
         revisionFld.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BuildToolsOptions.TEMPLATE.revision = revisionFld.getText();
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.revision(revisionFld.getText());
             }
         });
         super.add(revisionFld);
@@ -120,11 +114,16 @@ public class BuildToolsOptionsPanel extends JPanel {
         super.add(SwingHelper.createLabel("Pull Request(s)", 315, 150, 480, 25));
         // Pull Requests
         pullRequestsFld.setBounds(315, 175, 300, 25);
-        SwingHelper.setTooltip(pullRequestsFld, "BuildTools CLI: --pull-request &lt;repo:id&gt;");
+        SwingHelper.setTooltip(pullRequestsFld, "BuildTools CLI: --pull-request REPO:ID");
         pullRequestsFld.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BuildToolsOptions.TEMPLATE.pullRequests = pullRequestsFld.getText();
+                String pullRequests = pullRequestsFld.getText();
+                if (!pullRequests.isEmpty()) {
+                    BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.pullRequests(pullRequests.split(","));
+                } else {
+                    BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.pullRequests(new String[0]);
+                }
             }
         });
         super.add(pullRequestsFld);
@@ -132,7 +131,8 @@ public class BuildToolsOptionsPanel extends JPanel {
         super.add(SwingHelper.createLabel("Output Directory", 210, 200, 480, 25));
         // Output Directory
         outputDirFld.setBounds(210, 225, 300, 25);
-        SwingHelper.setTooltip(outputDirFld, "BuildTools CLI: --output-dir &lt;directory&gt;");
+        SwingHelper.setTooltip(outputDirFld, "BuildTools CLI: --output-dir PATH");
+        outputDirFld.setEditable(false);
         super.add(outputDirFld);
 
         // Set Output Directory
@@ -145,19 +145,20 @@ public class BuildToolsOptionsPanel extends JPanel {
             File dir = chooser.getSelectedFile();
             if (dir == null) return;
 
-            BuildToolsOptions.TEMPLATE.outputDirectory = dir.getAbsolutePath();
-            outputDirFld.setText(BuildToolsOptions.TEMPLATE.outputDirectory);
+            String selectedPath = dir.getAbsolutePath();
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.outputDirectory(selectedPath);
+            outputDirFld.setText(selectedPath);
         });
         super.add(selectOutputDirBtn);
 
         super.add(SwingHelper.createLabel("Final Name", 10, 200, 480, 25));
         // Final Name
         finalNameFld.setBounds(10, 225, 195, 25);
-        SwingHelper.setTooltip(finalNameFld, "BuildTools CLI: --final-name &lt;name&gt;<br />Leave blank for default names.");
+        SwingHelper.setTooltip(finalNameFld, "BuildTools CLI: --final-name NAME\nLeave blank for default names.");
         finalNameFld.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                BuildToolsOptions.TEMPLATE.finalName = finalNameFld.getText();
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.finalName(finalNameFld.getText());
             }
         });
         super.add(finalNameFld);
@@ -167,19 +168,19 @@ public class BuildToolsOptionsPanel extends JPanel {
         // Gen Sources
         genSourcesOpt.setBounds(10, 300, 480, 25);
         SwingHelper.setTooltip(genSourcesOpt, "BuildTools CLI: --generate-source");
-        genSourcesOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.generateSourcesJar = genSourcesOpt.isSelected());
+        genSourcesOpt.addActionListener(e -> BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.generateSources(genSourcesOpt.isSelected()));
         super.add(genSourcesOpt);
 
         // Gen Javadocs
         genDocsOpt.setBounds(10, 325, 480, 25);
         SwingHelper.setTooltip(genDocsOpt, "BuildTools CLI: --generate-docs");
-        genDocsOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.generateJavadocsJar = genDocsOpt.isSelected());
+        genDocsOpt.addActionListener(e -> BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.generateJavadocs(genDocsOpt.isSelected()));
         super.add(genDocsOpt);
 
         // MVN Install Remapped
         remappedOpt.setBounds(10, 350, 480, 25);
         SwingHelper.setTooltip(remappedOpt, "BuildTools CLI: --remapped");
-        remappedOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.remapped = remappedOpt.isSelected());
+        remappedOpt.addActionListener(e -> BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.remapped(remappedOpt.isSelected()));
         super.add(remappedOpt);
     }
 
@@ -187,47 +188,66 @@ public class BuildToolsOptionsPanel extends JPanel {
         // Bypass HTTPS Cert
         skipHttpsCertCheckOpt.setBounds(10, 425, 480, 25);
         SwingHelper.setTooltip(skipHttpsCertCheckOpt, "BuildTools CLI: --disable-certificate-check");
-        skipHttpsCertCheckOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.skipCertCheck = skipHttpsCertCheckOpt.isSelected());
+        skipHttpsCertCheckOpt.addActionListener(e -> BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.disableCertificateCheck(skipHttpsCertCheckOpt.isSelected()));
         super.add(skipHttpsCertCheckOpt);
 
         // Bypass Java Version
         skipJavaVersionCheckOpt.setBounds(10, 450, 480, 25);
         SwingHelper.setTooltip(skipJavaVersionCheckOpt, "BuildTools CLI: --disable-java-check");
-        skipJavaVersionCheckOpt.addActionListener(e -> BuildToolsOptions.TEMPLATE.skipJavaVersionCheck = skipJavaVersionCheckOpt.isSelected());
+        skipJavaVersionCheckOpt.addActionListener(e -> BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.disableJavaCheck(skipJavaVersionCheckOpt.isSelected()));
         super.add(skipJavaVersionCheckOpt);
 
         // Dev Mode
         devModeOpt.setBounds(10, 475, 480, 25);
         SwingHelper.setTooltip(devModeOpt, "BuildTools CLI: --dev");
         devModeOpt.addActionListener(e -> {
-            BuildToolsOptions.TEMPLATE.developerMode = devModeOpt.isSelected();
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.developerMode(devModeOpt.isSelected());
 
-            if (BuildToolsOptions.TEMPLATE.developerMode) {
-                revisionFld.setEditable(false);
-                SwingHelper.setTooltip(revisionFld, "Revisions can not be used with Experimental Mode, Developer Mode," +
-                        "\nor when \"Don't Pull from Git\" is enabled.");
-            } else if (!BuildToolsOptions.TEMPLATE.skipGitPull && !BuildToolsOptions.TEMPLATE.experimentalMode) {
-                revisionFld.setEditable(true);
-                SwingHelper.setTooltip(revisionFld, "BuildTools CLI: --rev &lt;revision&gt;");
-            }
+            toggleRevisionField();
         });
         super.add(devModeOpt);
 
         // Experimental Mode
-        experimentalBuildOpt.setBounds(10, 500, 480, 25);
-        SwingHelper.setTooltip(experimentalBuildOpt, "BuildTools CLI: --experimental");
-        experimentalBuildOpt.addActionListener(e -> {
-            BuildToolsOptions.TEMPLATE.experimentalMode = experimentalBuildOpt.isSelected();
+        experimentalOpt.setBounds(10, 500, 480, 25);
+        SwingHelper.setTooltip(experimentalOpt, "BuildTools CLI: --experimental");
+        experimentalOpt.addActionListener(e -> {
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.experimental(experimentalOpt.isSelected());
 
-            if (BuildToolsOptions.TEMPLATE.experimentalMode) {
-                revisionFld.setEditable(false);
-                SwingHelper.setTooltip(revisionFld, "Revisions can not be used with Experimental Mode, Developer Mode," +
-                        "\nor when \"Don't Pull from Git\" is enabled.");
-            } else if (!BuildToolsOptions.TEMPLATE.skipGitPull && !BuildToolsOptions.TEMPLATE.developerMode) {
-                revisionFld.setEditable(true);
-                SwingHelper.setTooltip(revisionFld, "BuildTools CLI: --rev &lt;revision&gt;");
-            }
+            toggleRevisionField();
         });
-        super.add(experimentalBuildOpt);
+        super.add(experimentalOpt);
+    }
+
+    private void updateCompileTargets() {
+        if (compileNothingOpt.isSelected()) {
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.addCompileTarget("NONE");
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.removeCompileTarget("SPIGOT");
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.removeCompileTarget("CRAFTBUKKIT");
+        } else {
+            BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.removeCompileTarget("NONE");
+
+            if (compileSpigotOpt.isSelected()) {
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.addCompileTarget("SPIGOT");
+            } else {
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.removeCompileTarget("SPIGOT");
+            }
+
+            if (compileCraftBukkitOpt.isSelected()) {
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.addCompileTarget("CRAFTBUKKIT");
+            } else {
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.removeCompileTarget("CRAFTBUKKIT");
+            }
+        }
+    }
+
+    private void toggleRevisionField() {
+        if (dontUpdateOpt.isSelected() || devModeOpt.isSelected() || experimentalOpt.isSelected()) {
+            revisionFld.setEditable(false);
+            SwingHelper.setTooltip(revisionFld, "Revisions can not be used with Experimental Mode, Developer Mode," +
+                    "\nor when \"Don't Pull from Git\" is enabled.");
+        } else {
+            revisionFld.setEditable(true);
+            SwingHelper.setTooltip(revisionFld, "BuildTools CLI: --rev REVISION");
+        }
     }
 }
