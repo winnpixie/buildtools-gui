@@ -29,11 +29,11 @@ public class LogItem {
         return throwable;
     }
 
-    public String formattedMessage(boolean includeLevelPrefix) {
+    public String formattedMessage(boolean includeLevelTitle) {
         StringBuilder messageBuilder = new StringBuilder();
 
         // Prefix
-        if (includeLevelPrefix) messageBuilder.append(level.prefix()).append(": ");
+        if (includeLevelTitle) messageBuilder.append('[').append(level.name()).append("] ");
 
         // Message + Parameters
         if (parameters != null && parameters.length > 0) {

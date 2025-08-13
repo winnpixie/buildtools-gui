@@ -1,24 +1,18 @@
 package io.github.winnpixie.logging;
 
 public enum LogLevel {
-    DEBUG(-1, "DEBUG"),
-    INFO(1, "INFO"),
-    WARNING(2, "WARNING"),
-    SEVERE(3, "SEVERE");
+    DEBUG(-1),
+    INFO(1),
+    WARNING(2),
+    SEVERE(3);
 
     private final int priority;
-    private final String prefix;
 
-    LogLevel(int priority, String prefix) {
+    LogLevel(int priority) {
         this.priority = priority;
-        this.prefix = prefix;
     }
 
     public int priority() {
         return priority;
-    }
-
-    public String prefix() {
-        return prefix;
     }
 }

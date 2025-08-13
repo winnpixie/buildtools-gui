@@ -6,7 +6,7 @@
 
     <groupId>io.github.winnpixie</groupId>
     <artifactId>buildtools-gui</artifactId>
-    <version>0.0.8</version>
+    <version>0.0.8.1</version>
 
     <properties>
         <javac.version>1.8</javac.version>
@@ -66,9 +66,9 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <includes>
-                    <include>version.properties</include>
-                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources-filtered</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
