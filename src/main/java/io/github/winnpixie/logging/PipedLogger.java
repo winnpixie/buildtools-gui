@@ -57,8 +57,12 @@ public class PipedLogger {
     }
 
     public void print(LogItem item) {
-        if (!hasPriority(item)) return;
+        if (!hasPriority(item)) {
+            return;
+        }
 
-        for (OutputPipe pipe : pipes) pipe.print(item);
+        for (OutputPipe pipe : pipes) {
+            pipe.print(item);
+        }
     }
 }

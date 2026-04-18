@@ -94,11 +94,11 @@ public class JavaConfigurationPanel extends JPanel {
 
             BuildToolsGUI.JAVA_CONFIGURATOR.javaHome(selectedPath);
             javaHomeFld.setText(selectedPath);
-        } catch (IOException exception) {
-            BuildToolsGUI.LOGGER.log(LogLevel.SEVERE, exception, "Error retrieving Java Runtime information");
+        } catch (IOException ioe) {
+            BuildToolsGUI.LOGGER.log(LogLevel.SEVERE, ioe, "Error retrieving Java Runtime information");
 
-            JOptionPane.showMessageDialog(this, String.format("Could not set JAVA_HOME!%n%n%s: %s",
-                    exception.getClass().getSimpleName(), exception.getMessage()), "Uh Oh!", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, String.format("Could not set JAVA_HOME!%n%n%s", ioe),
+                    "Uh Oh!", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

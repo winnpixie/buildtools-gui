@@ -15,8 +15,8 @@ public final class SystemHelper {
     public static final Platform PLATFORM;
 
     static {
-        PLATFORM = System.getProperty("os.name").contains("Windows")
-                ? Platform.WINDOWS : Platform.UNIX;
+        PLATFORM = System.getProperty("os.name").contains("Windows") ?
+                Platform.WINDOWS : Platform.UNIX;
     }
 
     private SystemHelper() {
@@ -24,7 +24,10 @@ public final class SystemHelper {
 
     public static String getDefaultJavaHome() {
         String home = System.getenv("JAVA_HOME");
-        if (home == null || home.isEmpty()) return System.getProperty("java.home");
+        if (home == null
+                || home.isEmpty()) {
+            return System.getProperty("java.home");
+        }
 
         return home;
     }
@@ -33,26 +36,33 @@ public final class SystemHelper {
         StringBuilder pathBuilder = new StringBuilder(javaHome)
                 .append(File.separatorChar).append("bin")
                 .append(File.separatorChar).append("java");
-        if (PLATFORM == Platform.WINDOWS) pathBuilder.append(".exe");
+        if (PLATFORM == Platform.WINDOWS) {
+            pathBuilder.append(".exe");
+        }
 
         return PLATFORM.getPathFormatter().apply(pathBuilder.toString());
     }
 
     public static String getDefaultMavenOptions() {
         String mavenOpts = System.getenv("MAVEN_OPTS");
-        if (mavenOpts == null || mavenOpts.isEmpty()) return "-Xms1024M -Xmx1024M";
+        if (mavenOpts == null
+                || mavenOpts.isEmpty()) {
+            return "-Xms1024M -Xmx1024M";
+        }
 
         return mavenOpts;
     }
 
     public static void openFolder(File file) {
-        if (!file.isDirectory()) return;
+        if (!file.isDirectory()) {
+            return;
+        }
 
         try {
             Desktop.getDesktop().open(file);
             return;
-        } catch (Exception exception) {
-            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, exception, "Issue opening folder");
+        } catch (Exception e) {
+            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, e, "Issue opening folder");
         }
 
         openLink(file.toURI());
@@ -61,21 +71,22 @@ public final class SystemHelper {
     public static void openLink(URL url) {
         try {
             openLink(url.toURI());
-        } catch (Exception exception) {
-            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, exception, "Issue opening link");
+        } catch (Exception e) {
+            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, e, "Issue opening link");
         }
     }
 
     public static void openLink(URI uri) {
         try {
             Desktop.getDesktop().browse(uri);
-        } catch (Exception exception) {
-            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, exception, "Issue opening link");
+        } catch (Exception e) {
+            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, e, "Issue opening link");
         }
     }
 
     public enum Platform {
-        WINDOWS(path -> path.indexOf(' ') < 0 ? path : String.format("\"%s\"", path)),
+        WINDOWS(path -> path.indexOf(' ') < 0 ?
+                path : String.format("\"%s\"", path)),
         UNIX(path -> path.replace(" ", "\\ "));
 
         private final UnaryOperator<String> pathFormatter;

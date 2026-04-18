@@ -9,6 +9,7 @@ public class WorkerInfoPanel extends JPanel {
         super();
 
         super.add(SwingHelper.createLabel("Jobs you start will be displayed in this area."
-                + "\nClose worker tabs by pressing 'Ctrl+W' once BuildTools has completed."));
+                + "\nClose tabs by pressing 'Ctrl+W' after a worker has completed."
+                + "\nYou may press 'Ctrl+D' to forcefully terminate a worker."));
     }
 }

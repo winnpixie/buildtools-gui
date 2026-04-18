@@ -4,6 +4,7 @@ import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.ui.panels.AboutPanel;
 import io.github.winnpixie.btgui.ui.panels.ConfigurationTabsPanel;
 import io.github.winnpixie.btgui.ui.panels.JobsPanel;
+import io.github.winnpixie.btgui.utilities.IOHelper;
 import io.github.winnpixie.logging.LogLevel;
 
 import javax.imageio.ImageIO;
@@ -22,10 +23,10 @@ public class MainWindow extends JFrame {
         this.populateWithComponents();
         this.packAndDisplay();
 
-        try (InputStream iconStream = getClass().getResourceAsStream("/assets/icon-small.png")) {
+        try (InputStream iconStream = IOHelper.getResourceStream("/assets/icon-small.png")) {
             super.setIconImage(ImageIO.read(iconStream));
-        } catch (IOException exception) {
-            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, exception, "Issue setting window icon");
+        } catch (IOException ioe) {
+            BuildToolsGUI.LOGGER.log(LogLevel.WARNING, ioe, "Issue setting window icon");
         }
     }
 
@@ -37,24 +38,27 @@ public class MainWindow extends JFrame {
         super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                if (BuildToolsGUI.JOB_TRACKER.get() > 0) {
-                    MainWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-                    JOptionPane.showMessageDialog(MainWindow.this, "Please wait for ALL BuildTools tasks to finish before exiting the program.");
-                } else {
-                    MainWindow.super.setDefaultCloseOperation(EXIT_ON_CLOSE);
+                if (BuildToolsGUI.JOB_TRACKER.get() == 0) {
+                    MainWindow.super.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                    return;
                 }
+
+                MainWindow.super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+                JOptionPane.showMessageDialog(MainWindow.this,
+                        "You must wait for all active workers to finish before exiting.",
+                        "Whoops!", JOptionPane.WARNING_MESSAGE);
             }
         });
     }
 
     public void populateWithComponents() {
-        JTabbedPane panelTabs = new JTabbedPane();
+        JTabbedPane tabs = new JTabbedPane();
 
-        panelTabs.add("Options", new ConfigurationTabsPanel());
-        panelTabs.add("Jobs", new JobsPanel());
-        panelTabs.add("About", new AboutPanel());
+        tabs.add("Options", new ConfigurationTabsPanel());
+        tabs.add("Jobs", new JobsPanel());
+        tabs.add("About", new AboutPanel());
 
-        super.add(panelTabs);
+        super.add(tabs);
     }
 
     public void packAndDisplay() {

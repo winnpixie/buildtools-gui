@@ -14,7 +14,7 @@ public class AboutPanel extends JPanel {
     }
 
     private void populateWithComponents() {
-        super.add(SwingHelper.createLabel(String.format("BuildTools GUI (v%s)<hr />", BuildToolsGUI.getVersion()),
+        super.add(SwingHelper.createLabel(String.format("BuildTools GUI (v%s)<hr />", BuildToolsGUI.VERSION),
                 5, 0, 930, 25));
         super.add(SwingHelper.createLabel("A third-party front-end for SpigotMC's BuildTools software.", 5, 25, 930, 25));
         super.add(SwingHelper.createHyperlinkedLabel("Developed by <a href=\"https://github.com/winnpixie/\">winnpixie</a>.",
@@ -24,12 +24,12 @@ public class AboutPanel extends JPanel {
                 10, 75, 480, 25));
 
         super.add(SwingHelper.createLabel("Credits/Attributions<hr />", 5, 125, 930, 25));
-        super.add(SwingHelper.createHyperlinkedLabel("<a href=\"https://spigotmc.org/\">SpigotMC</a> - Provides the " +
+        super.add(SwingHelper.createHyperlinkedLabel("<a href=\"https://spigotmc.org/\">SpigotMC</a> - " +
                         "<a href=\"https://hub.spigotmc.org/stash/projects/SPIGOT/repos/buildtools/browse\">BuildTools</a>" +
-                        " software that this program utilizes.",
+                        ", the software that this interface utilizes.",
                 10, 150, 480, 25));
         super.add(SwingHelper.createHyperlinkedLabel("<a href=\"https://www.formdev.com/\">FormDev</a> - " +
-                        "<a href=\"https://www.formdev.com/flatlaf/\">FlatLaf</a>, an actually good looking Java Swing L&F.",
+                        "<a href=\"https://www.formdev.com/flatlaf/\">FlatLaf</a>, the Swing Look and Feel of this GUI.",
                 10, 175, 480, 50));
     }
 }

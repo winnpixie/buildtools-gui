@@ -53,8 +53,11 @@ public class SOTextField extends JTextField {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (placeholder == null) return;
-        if (!getText().isEmpty()) return;
+
+        if (placeholder == null
+                || !getText().isEmpty()) {
+            return;
+        }
 
         Graphics2D g2d = (Graphics2D) g.create();
         g2d.setColor(super.getDisabledTextColor());

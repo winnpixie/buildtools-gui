@@ -3,10 +3,13 @@ package io.github.winnpixie.btgui.utilities;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+import java.awt.*;
 
 public final class SwingHelper {
     private static final HyperlinkListener LINK_LISTENER = event -> {
-        if (event.getEventType() != HyperlinkEvent.EventType.ACTIVATED) return;
+        if (event.getEventType() != HyperlinkEvent.EventType.ACTIVATED) {
+            return;
+        }
 
         SystemHelper.openLink(event.getURL());
     };
@@ -14,11 +17,14 @@ public final class SwingHelper {
     private SwingHelper() {
     }
 
-    public static JLabel createLabel(String text, int x, int y, int width, int height) {
-        JLabel label = createLabel(text);
-        label.setBounds(x, y, width, height);
+    public static <T extends Component> T create(T type, int x, int y, int width, int height) {
+        type.setBounds(x, y, width, height);
 
-        return label;
+        return type;
+    }
+
+    public static JLabel createLabel(String text, int x, int y, int width, int height) {
+        return create(createLabel(text), x, y, width, height);
     }
 
     public static JLabel createLabel(String text) {

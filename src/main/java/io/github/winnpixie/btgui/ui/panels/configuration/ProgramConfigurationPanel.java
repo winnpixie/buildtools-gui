@@ -21,14 +21,14 @@ public class ProgramConfigurationPanel extends JPanel {
     private void populateWithComponents() {
         // Download BuildTools
         downloadBuildToolsOpt.setBounds(5, 0, 480, 25);
-        SwingHelper.setTooltip(downloadBuildToolsOpt, "Download's BuildTools.jar from SpigotMC Jenkins.");
+        SwingHelper.setTooltip(downloadBuildToolsOpt, "Download's BuildTools.jar from SpigotMC's Jenkins for <strong>every</strong> build.");
         downloadBuildToolsOpt.addActionListener(e -> BuildToolsGUI.PROGRAM_CONFIGURATOR.downloadBuildTools(downloadBuildToolsOpt.isSelected()));
         super.add(downloadBuildToolsOpt);
 
         // Isolate Runs
         isolateProcessesOpt.setBounds(5, 25, 480, 25);
         SwingHelper.setTooltip(isolateProcessesOpt, "Creates a new directory with a random name when BuildTools is ran," +
-                "\nuseful for building different Minecraft versions.");
+                "\nuseful for building different versions simultaneously.");
         isolateProcessesOpt.addActionListener(e -> BuildToolsGUI.PROGRAM_CONFIGURATOR.isolateProcesses(isolateProcessesOpt.isSelected()));
         super.add(isolateProcessesOpt);
 
@@ -40,7 +40,7 @@ public class ProgramConfigurationPanel extends JPanel {
 
         // Delete Run Directory on Finish
         deleteWorkOnFinishOpt.setBounds(5, 75, 480, 25);
-        SwingHelper.setTooltip(deleteWorkOnFinishOpt, "Deletes the BuildTools run directory when it is completed.");
+        SwingHelper.setTooltip(deleteWorkOnFinishOpt, "Deletes the BuildTools work directory when it is completed.");
         deleteWorkOnFinishOpt.addActionListener(e -> BuildToolsGUI.PROGRAM_CONFIGURATOR.deleteWorkOnFinish(deleteWorkOnFinishOpt.isSelected()));
         super.add(deleteWorkOnFinishOpt);
     }

@@ -33,7 +33,11 @@ public class LogItem {
         StringBuilder messageBuilder = new StringBuilder();
 
         // Prefix
-        if (includeLevelTitle) messageBuilder.append('[').append(level.name()).append("] ");
+        if (includeLevelTitle) {
+            messageBuilder.append('[')
+                    .append(level.name())
+                    .append("] ");
+        }
 
         // Message + Parameters
         if (parameters != null && parameters.length > 0) {
@@ -43,10 +47,15 @@ public class LogItem {
         }
 
         // Thrown
-        if (throwable != null) messageBuilder.append('\n')
-                .append(throwable.getClass().getSimpleName())
-                .append(": ")
-                .append(throwable.getMessage());
+        if (throwable != null) {
+            messageBuilder.append('\n')
+                    .append(throwable);
+
+            for (StackTraceElement trace : throwable.getStackTrace()) {
+                messageBuilder.append('\n')
+                        .append(trace);
+            }
+        }
 
         return messageBuilder.toString();
     }

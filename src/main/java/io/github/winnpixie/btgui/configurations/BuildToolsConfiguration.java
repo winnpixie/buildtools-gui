@@ -99,19 +99,46 @@ public class BuildToolsConfiguration {
     public List<String> toList() {
         List<String> arguments = new ArrayList<>();
 
-        if (disableCertificateCheck) arguments.add("--disable-certificate-check");
-        if (disableJavaCheck) arguments.add("--disable-java-check");
-        if (dontUpdate) arguments.add("--dont-update");
-        if (generateSources) arguments.add("--generate-source");
-        if (generateJavadocs) arguments.add("--generate-docs");
-        if (developerMode) arguments.add("--dev");
-        if (experimental) arguments.add("--experimental");
-        if (remapped) arguments.add("--remapped");
-        if (compileIfChanged) arguments.add("--compile-if-changed");
+        if (disableCertificateCheck) {
+            arguments.add("--disable-certificate-check");
+        }
+
+        if (disableJavaCheck) {
+            arguments.add("--disable-java-check");
+        }
+
+        if (dontUpdate) {
+            arguments.add("--dont-update");
+        }
+
+        if (generateSources) {
+            arguments.add("--generate-source");
+        }
+
+        if (generateJavadocs) {
+            arguments.add("--generate-docs");
+        }
+
+        if (developerMode) {
+            arguments.add("--dev");
+        }
+
+        if (experimental) {
+            arguments.add("--experimental");
+        }
+
+        if (remapped) {
+            arguments.add("--remapped");
+        }
+
+        if (compileIfChanged) {
+            arguments.add("--compile-if-changed");
+        }
 
         if (!dontUpdate && !developerMode && !experimental) {
             arguments.add("--rev");
-            arguments.add(revision.isEmpty() ? "latest" : revision);
+            arguments.add(revision.isEmpty() ?
+                    "latest" : revision);
         }
 
         for (String pullRequest : pullRequests) {
@@ -161,77 +188,92 @@ public class BuildToolsConfiguration {
 
         public Builder disableCertificateCheck(boolean disable) {
             this.disableCertificateCheck = disable;
+
             return this;
         }
 
         public Builder disableJavaCheck(boolean disable) {
             this.disableJavaCheck = disable;
+
             return this;
         }
 
         public Builder dontUpdate(boolean skip) {
             this.dontUpdate = skip;
+
             return this;
         }
 
         public Builder addCompileTarget(String target) {
             this.compilationTargets.add(target);
+
             return this;
         }
 
         public Builder removeCompileTarget(String target) {
             this.compilationTargets.remove(target);
+
             return this;
         }
 
         public Builder revision(String revision) {
             this.revision = revision;
+
             return this;
         }
 
         public Builder pullRequests(String[] pullRequests) {
             this.pullRequests.clear();
             Collections.addAll(this.pullRequests, pullRequests);
+
             return this;
         }
 
         public Builder outputDirectory(String directory) {
             this.outputDirectory = directory;
+
             return this;
         }
 
         public Builder finalName(String name) {
             this.finalName = name;
+
             return this;
         }
 
         public Builder generateSources(boolean sources) {
             this.generateSources = sources;
+
             return this;
         }
 
         public Builder generateJavadocs(boolean javadocs) {
             this.generateJavadocs = javadocs;
+
             return this;
         }
 
         public Builder developerMode(boolean dev) {
             this.developerMode = dev;
+
             return this;
         }
 
         public Builder experimental(boolean experimental) {
             this.experimental = experimental;
+
             return this;
         }
 
         public Builder remapped(boolean remap) {
             this.remapped = remap;
+
             return this;
         }
 
         public Builder compileIfChanged(boolean compileIfChanged) {
             this.compileIfChanged = compileIfChanged;
+
             return this;
         }
 

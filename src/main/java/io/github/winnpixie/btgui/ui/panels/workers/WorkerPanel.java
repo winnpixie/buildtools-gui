@@ -2,6 +2,7 @@ package io.github.winnpixie.btgui.ui.panels.workers;
 
 import io.github.winnpixie.btgui.BuildToolsGUI;
 import io.github.winnpixie.btgui.tasks.BuildToolsTask;
+import io.github.winnpixie.logging.LogLevel;
 import io.github.winnpixie.logging.PipedLogger;
 import io.github.winnpixie.logging.pipes.TextAreaOutputPipe;
 
@@ -9,13 +10,16 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 public class WorkerPanel extends JPanel {
     private final JTextArea outputArea = new JTextArea();
 
     private final JTabbedPane tabController;
 
-    private transient Thread workerThread;
+    private transient BuildToolsTask task;
+    private transient CompletableFuture<Integer> worker;
 
     public WorkerPanel(JTabbedPane tabController) {
         super();
@@ -32,25 +36,33 @@ public class WorkerPanel extends JPanel {
     private void createTask() {
         PipedLogger logger = new PipedLogger(new TextAreaOutputPipe(outputArea));
 
-        BuildToolsTask task = new BuildToolsTask(logger,
+        this.task = new BuildToolsTask(logger,
                 BuildToolsGUI.PROGRAM_CONFIGURATOR.build(),
                 BuildToolsGUI.JAVA_CONFIGURATOR.build(),
                 BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.build());
 
-        this.workerThread = new Thread(() -> {
-            BuildToolsGUI.JOB_TRACKER.incrementAndGet();
+        BuildToolsGUI.JOB_TRACKER.incrementAndGet();
+        this.worker = CompletableFuture.supplyAsync(() -> {
+                    try {
+                        return task.getAsInt();
+                    } catch (Exception unknown) {
+                        throw new CompletionException(unknown);
+                    }
+                }, BuildToolsGUI.WORKER_SERVICE)
+                .whenComplete((exitCode, throwable) -> {
+                    BuildToolsGUI.JOB_TRACKER.decrementAndGet();
 
-            int exitCode = task.getAsInt();
-            if (exitCode == 0) {
-                logger.info("The build process has completed successfully!");
-            } else {
-                logger.severe("An error occurred (code %d) while running this task.", exitCode);
-            }
+                    if (throwable != null) {
+                        logger.log(LogLevel.SEVERE, throwable, "Uncaught error while running");
+                        return;
+                    }
 
-            BuildToolsGUI.JOB_TRACKER.decrementAndGet();
-        }, "build-tools_task");
-
-        workerThread.start();
+                    if (exitCode == 0) {
+                        logger.info("The build process has completed successfully!");
+                    } else {
+                        logger.severe("The worker encountered an error (code %d) while executing.", exitCode);
+                    }
+                });
     }
 
     private void configurePanel() {
@@ -59,10 +71,26 @@ public class WorkerPanel extends JPanel {
 
         super.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK), "Ctrl+W");
+        super.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK), "Ctrl+D");
         super.getActionMap().put("Ctrl+W", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!workerThread.isAlive()) tabController.remove(WorkerPanel.this);
+                if (!worker.isDone()) {
+                    JOptionPane.showMessageDialog(WorkerPanel.this,
+                            "You are not permitted to close the panel of an active worker!",
+                            "Whoops!", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                tabController.remove(WorkerPanel.this);
+            }
+        });
+
+        super.getActionMap().put("Ctrl+D", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                task.terminate();
             }
         });
     }

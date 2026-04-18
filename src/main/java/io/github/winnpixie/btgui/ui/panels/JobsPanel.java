@@ -7,8 +7,8 @@ import io.github.winnpixie.btgui.ui.panels.workers.WorkerPanel;
 import javax.swing.*;
 
 public class JobsPanel extends JPanel {
-    private final JButton previewBtn = new JButton("Preview Command");
-    private final JButton runBtn = new JButton("Start BuildTools Worker");
+    private final JButton previewBtn = new JButton("Show Command Preview");
+    private final JButton runBtn = new JButton("Start New Worker");
     private final JTextArea previewArea = new JTextArea();
     private final JTabbedPane workerTabs = new JTabbedPane();
 

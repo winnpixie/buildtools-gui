@@ -37,21 +37,25 @@ public class ProgramConfiguration {
 
         public Builder downloadBuildTools(boolean download) {
             this.downloadBuildTools = download;
+
             return this;
         }
 
         public Builder isolateProcesses(boolean isolate) {
             this.isolateProcesses = isolate;
+
             return this;
         }
 
         public Builder showOutputOnFinish(boolean show) {
             this.showOutputOnFinish = show;
+
             return this;
         }
 
         public Builder deleteWorkOnFinish(boolean delete) {
             this.deleteWorkOnFinish = delete;
+
             return this;
         }
 

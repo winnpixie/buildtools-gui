@@ -47,21 +47,26 @@ public class JavaConfiguration {
 
         public Builder javaHome(String path) {
             this.javaHome = path;
+
             return this;
         }
 
         public Builder javaArguments(String arguments) {
             this.javaArguments = arguments;
+
             return this;
         }
 
         public Builder mavenArguments(String arguments) {
             this.mavenArguments = arguments;
+
             return this;
         }
 
         public JavaConfiguration build() {
-            if (javaHome.isEmpty()) javaHome = SystemHelper.getDefaultJavaHome();
+            if (javaHome.isEmpty()) {
+                javaHome = SystemHelper.getDefaultJavaHome();
+            }
 
             return new JavaConfiguration(this);
         }

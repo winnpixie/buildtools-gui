@@ -119,11 +119,9 @@ public class BuildToolsConfigurationPanel extends JPanel {
             @Override
             public void keyReleased(KeyEvent e) {
                 String pullRequests = pullRequestsFld.getText();
-                if (!pullRequests.isEmpty()) {
-                    BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.pullRequests(pullRequests.split(","));
-                } else {
-                    BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.pullRequests(new String[0]);
-                }
+
+                BuildToolsGUI.BUILDTOOLS_CONFIGURATOR.pullRequests(pullRequests.isEmpty() ?
+                        new String[0] : pullRequests.split(","));
             }
         });
         super.add(pullRequestsFld);

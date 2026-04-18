@@ -16,12 +16,12 @@ public class ConfigurationTabsPanel extends JPanel {
     }
 
     private void populateWithComponents() {
-        JTabbedPane configurationTabs = new JTabbedPane();
+        JTabbedPane tabs = new JTabbedPane();
 
-        configurationTabs.add("BuildTools", new BuildToolsConfigurationPanel());
-        configurationTabs.add("Java", new JavaConfigurationPanel());
-        configurationTabs.add("Program", new ProgramConfigurationPanel());
+        tabs.add("BuildTools", new BuildToolsConfigurationPanel());
+        tabs.add("Java", new JavaConfigurationPanel());
+        tabs.add("Program", new ProgramConfigurationPanel());
 
-        super.add(configurationTabs);
+        super.add(tabs);
     }
 }
