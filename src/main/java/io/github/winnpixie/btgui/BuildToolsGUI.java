@@ -52,10 +52,6 @@ public class BuildToolsGUI {
     }
 
     private static void init() {
-        // Request antialiasing for text
-        System.setProperty("awt.useSystemAAFontSettings", "on");
-        System.setProperty("swing.aatext", "true");
-
         // Request hardware acceleration for rendering
         requestHardwareAcceleration();
     }
